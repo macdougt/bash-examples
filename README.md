@@ -1,3 +1,3 @@
 ## Bash Examples
 
-This repository includes 
+This repository includes bash content
