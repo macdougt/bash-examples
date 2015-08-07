@@ -1,0 +1,18 @@
+
+# Takes epoch time two arguments (date +%s) 
+date_diff () {
+   result=$(($2-$1))
+
+   if [ $result -lt "60" ] ; then
+      echo "$result seconds"
+   elif [ $result -lt "3600" ] ; then
+      minutes=$(($result/60))
+      seconds=$(($result-($minutes*60)))
+      echo "$minutes minute(s) and $seconds seconds"
+   else
+      hours=$(($result/3600))
+      minutes=$((($result-($hours*3600))/60))
+      seconds=$(($result-($hours*3600)-($minutes*60)))
+      echo "$hours hour(s) $minutes minute(s) and $seconds seconds"
+   fi
+}
