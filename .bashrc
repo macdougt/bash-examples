@@ -64,6 +64,8 @@ fi
 
 # Not ideal but it will append the last command to a common history file
 # this will leave the last commands in each terminal unadded
+# TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
+# contribute
 BIG_HISTORY="~/.bash_big_history"
 
 get_last() {
@@ -72,8 +74,6 @@ get_last() {
 }
 
 PROMPT_COMMAND="get_last>> $BIG_HISTORY"
-
-
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
