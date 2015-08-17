@@ -42,6 +42,7 @@ alias dockerlsc='docker ps -a'
 alias dh='list ~/.dirhistory'
 alias lal='ls -al'
 alias sdh='dh | grep $@'
+alias bbh='list ~/.bash_big_history'
 
 function webhere() { python -m SimpleHTTPServer $1; }
 export -f webhere
