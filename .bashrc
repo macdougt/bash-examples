@@ -62,6 +62,19 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# Not ideal but it will append the last command to a common history file
+# this will leave the last commands in each terminal unadded
+BIG_HISTORY="~/.bash_big_history"
+
+get_last() {
+    echo -n "[$$ $(whoami) $(date +'%s') \"$(date)\"] "
+    fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//'
+}
+
+PROMPT_COMMAND="get_last>> $BIG_HISTORY"
+
+
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
