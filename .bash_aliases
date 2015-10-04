@@ -18,6 +18,12 @@ function dockerCleanFunction() {
 
 alias dockerclean=dockerCleanFunction
 
+function dockerStartFunction() {
+   docker run -i -t $1 /bin/bash
+}
+
+alias dockerstart=dockerStartFunction
+
 function dockerKillFunction() {
    docker stop $1;docker rm $1
 }
