@@ -18,6 +18,12 @@ alias vcs='vi ~/.bashrc'
 alias webhere='python -m SimpleHTTPServer '
 
 
+# For locate
+alias lcoate='locate'
+alias loc='locate'
+alias uloc='updatedb; locate '
+
+
 # Tracking - bbh
 alias bbh='list ~/.bash_big_history'
 
