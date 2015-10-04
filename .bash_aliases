@@ -1,34 +1,4 @@
-
-function backup() {
-   cp $1 $1.bak;
-}
-
-alias bu=backup
-
-function dockerBashFunction() {
-   docker exec -i -t $1 bash
-}
-
-alias dockerbash=dockerBashFunction
-alias docb='dockerbash'
-
-function dockerCleanFunction() {
-   docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
-}
-
-alias dockerclean=dockerCleanFunction
-
-function dockerStartFunction() {
-   docker run -i -t $1 /bin/bash
-}
-
-alias dockerstart=dockerStartFunction
-
-function dockerKillFunction() {
-   docker stop $1;docker rm $1
-}
-
-alias dockerkill=dockerKillFunction
+# Bash aliases
 
 alias a='alias'
 alias u='unalias'
@@ -62,4 +32,35 @@ function cn() { cd `cdn $1`; }
 export -f cn
 function cdd() { cd `getDir $1`; }
 export -f cdd
+
+function backup() {
+   cp $1 $1.bak;
+}
+
+alias bu=backup
+
+function dockerBashFunction() {
+   docker exec -i -t $1 bash
+}
+
+alias dockerbash=dockerBashFunction
+alias docb='dockerbash'
+
+function dockerCleanFunction() {
+   docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
+}
+
+alias dockerclean=dockerCleanFunction
+
+function dockerStartFunction() {
+   docker run -i -t $1 /bin/bash
+}
+
+alias dockerstart=dockerStartFunction
+
+function dockerKillFunction() {
+   docker stop $1;docker rm $1
+}
+
+alias dockerkill=dockerKillFunction
 
