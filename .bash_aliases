@@ -1,30 +1,30 @@
 # Bash aliases
 
-alias a='alias'
-alias u='unalias'
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-alias h='history'
-alias vcs='vi ~/.bashrc'
-alias s='source ~/.bashrc'
-alias dockergrep='history| grep docker'
-alias dockerRmContainers='docker rm $(docker ps -a -q)'
-alias dockerkillall='docker stop $(docker ps -a -q);docker rm $(docker ps -a -q)'
-alias dls='docker images;docker ps -a'
-alias dockerls='docker images;docker ps -a'
-alias dockerlsc='docker ps -a'
 
-alias dh='list ~/.dirhistory'
+# Builtin bash
+alias a='alias'
+alias c='clear'
+alias gh='history | grep $@'
+alias h='history'
+alias l='ls -CF'
+alias la='ls -A'
 alias lal='ls -al'
-alias sdh='dh | grep $@'
+alias ll='ls -ltr'
+alias s='source ~/.bashrc'
+alias u='unalias'
+alias valias='vi ~/.bash_aliases'
+alias vil='vi `fc -s`'
+alias vcs='vi ~/.bashrc'
+alias webhere='python -m SimpleHTTPServer '
+
+
+# Tracking - bbh
 alias bbh='list ~/.bash_big_history'
 
-function webhere() { python -m SimpleHTTPServer $1; }
-export -f webhere
 
-alias vil='vi `fc -s`'
-
+# dirhistory
+alias dh='list ~/.dirhistory'
+alias sdh='dh | grep $@'
 # Override cd - change directory
 function cd() { builtin cd "$@" && appendif `pwd`;}
 export -f cd
@@ -39,6 +39,16 @@ function backup() {
 
 alias bu=backup
 
+
+# Docker
+alias dockergrep='history| grep docker'
+alias dockerRmContainers='docker rm $(docker ps -a -q)'
+alias dockerkillall='docker stop $(docker ps -a -q);docker rm $(docker ps -a -q)'
+alias dls='docker images;docker ps -a'
+alias dockerls='docker images;docker ps -a'
+alias dockerlsc='docker ps -a'
+
+# Docker functions
 function dockerBashFunction() {
    docker exec -i -t $1 bash
 }
