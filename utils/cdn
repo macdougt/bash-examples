@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+my $dirNum = shift;
+my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
+
+open DH, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
+
+# Skip to the specified line and return its contents
+while(my $dir = <DH>) {
+	if ($. == $dirNum) {
+		chomp($dir);
+		print $dir;
+		last;
+	}
+}
+close DH;
+

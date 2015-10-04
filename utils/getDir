@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+my $dirEnding = shift;
+my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
+
+open DH, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
+
+# List matches
+my @matches;
+while(my $dir = <DH>) {
+	chomp($dir);
+	if ($dir =~ /.*\/[^\/]*?$dirEnding[^\/]*/i) {
+		push(@matches, $dir);
+	}
+}
+close DH;
+
+if ($#matches > 0) {
+	print STDERR "Matches:\n";
+	for (my $i=0; $i <= $#matches; $i++) {
+	   print STDERR ($i+1);
+	   print STDERR ") $matches[$i]\n";
+	}
+	print STDERR "Pick the directory\n";
+	my $choice = <>;
+
+	print "$matches[$choice-1]";
+} elsif ($#matches == 0) {
+	print "$matches[0]";
+} else {
+	print STDERR "No matches\n";
+}

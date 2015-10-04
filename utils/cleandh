@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+
+my $option = shift;
+my $forceOption=0;
+
+if ($option eq "-f" || $option eq "-force") {
+	$forceOption=1;
+} 
+
+my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
+
+# Create the directory history file if it does not exist
+if (! -e $dirHistoryFile) {
+	open DH, ">$dirHistoryFile" || die;
+	close DH;
+}
+
+# Store the directories
+my @dirs;
+
+# Read the contents of ~/.dirhistory file
+open DH2, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
+
+# Recreate the list
+
+print "Removing...\n";
+my $removeCount=0;
+while(my $dir = <DH2>) {
+	chomp($dir);
+	if (-d $dir) {
+		push(@dirs, $dir);		
+	} else {
+		print "\t$dir\n";
+		$removeCount++;
+	}
+}
+close DH2;
+
+if ($removeCount == 0) {
+	print " No directories to remove.\n";
+	exit;
+}
+
+print "Removing $removeCount directories\n";
+
+if (! $forceOption) {
+	print "Go ahead with removal?[y/N]\n";
+	my $consent= <STDIN>;
+	chomp $consent;
+	if ($consent ne "Y" && $consent ne "y") {
+		# Exit with no action performed
+		print "Did not remove the directories.\n";
+		exit;  
+	}
+}
+
+# Add the current directory to the end of the list
+push(@dirs, $dirToBeAdded);
+
+# Overwrite the directory history file with the updated list
+open DH3, ">$dirHistoryFile" or die "Could not open file '$dirHistoryFile' $!";
+my $i = 0;
+while ($i<$#dirs) {
+    print DH3 "$dirs[$i]\n";
+    $i++;
+}
+# Add the last directory with no newline
+print DH3 "$dirs[$#dirs]";
+
+close DH3;
+
