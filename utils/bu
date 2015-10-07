@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+# Must have one argument
+
+my $file_to_copy = shift;
+
+if ($file_to_copy !~ /\w/) {
+   die "You need to specify a file to back up\n";
+}
+
+# Dissect the file a bit
+# Grab the first letter
+my $first_letter = substr($file_to_copy, 0, 1);
+
+opendir(DH,".");
+my @files = readdir(DH);
+closedir(DH);
+
+my $max_rev = 1;
+
+use File::Copy;
+
+foreach my $file (@files)
+{
+    # skip . and ..
+    next if($file =~ /^\.$/);
+    next if($file =~ /^\.\.$/);
+
+    # $file is the file used on this iteration of the loop
+    if ($file =~ /^$first_letter(\d+)_$file_to_copy$/) {
+       my $cur_val = $1;
+       if ($cur_val > $max_rev) {
+	  $max_rev = $cur_val;
+       }
+    }
+}
+my $new_val = $max_rev + 1;
+copy($file_to_copy,"$first_letter$new_val\_$file_to_copy") or die "Copy failed: $!";
+
