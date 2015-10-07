@@ -4,6 +4,7 @@
 # Builtin bash
 alias a='alias'
 alias c='clear'
+alias g='grep'
 alias gh='history | grep $@'
 alias h='history'
 alias l='ls -CF'
@@ -38,13 +39,6 @@ function cn() { cd `cdn $1`; }
 export -f cn
 function cdd() { cd `getDir $1`; }
 export -f cdd
-
-function backup() {
-   cp $1 $1.bak;
-}
-
-alias bu=backup
-
 
 # Docker
 alias dockergrep='history| grep docker'
