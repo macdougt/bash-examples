@@ -1,5 +1,11 @@
 # Installer to standard terminal utilities and functionality
 
+# This script must be run as root
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
 # Operate in a temporary directory
 # Check for mktemp
 if ! which mktemp
@@ -34,11 +40,38 @@ echo "This a $ARCH operating system"
 
 if ! which wget
 then
-	echo "Need to install wget"
-	apt-get install wget
+   echo "Need to install wget"
+   if [ "$ARCH" == "linux" ]
+   then
+      apt-get install wget
+   elif [ "$ARCH" == "mac" ]
+   then
+      brew install wget
+   else
+      echo "I do not recognize architecture $ARCH"
+      exit 2
+   fi 
 else 
 	echo "wget installed already"
 fi
+
+if ! which perl
+then
+   echo "Need to install perl"
+   if [ "$ARCH" == "linux" ]
+   then
+      apt-get install perl
+   elif [ "$ARCH" == "mac" ]
+   then
+      brew install perl
+   else
+      echo "I do not recognize architecture $ARCH"
+      exit 2
+   fi
+else
+        echo "perl installed already"
+fi
+
 
 # Grab the files
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bash_aliases -O .bash_aliases
@@ -48,8 +81,9 @@ wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cdn -
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/getDir -O getDir
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cleandh -O cleandh
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/list -O list
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bu -O bu
 
-chmod +x appendif cdn getDir cleandh list
+chmod +x appendif cdn getDir cleandh list bu
 
 # Move the files if necessary
 if [[ "$PWD" != "$HOME" ]]
@@ -58,7 +92,7 @@ then
    mv .bash_aliases $HOME
 fi
 
-mv appendif cdn getDir cleandh list /usr/local/bin
+mv appendif cdn getDir cleandh list bu /usr/local/bin
 
 # Get rid of the temporary directory
 rmdir $mytmpdir
