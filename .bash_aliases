@@ -47,6 +47,8 @@ alias dockerkillall='docker stop $(docker ps -a -q);docker rm $(docker ps -a -q)
 alias dls='docker images;docker ps -a'
 alias dockerls='docker images;docker ps -a'
 alias dockerlsc='docker ps -a'
+alias dockerkillexit='docker ps -aq -f status=exited | xargs docker rm'
+
 
 # Docker functions
 function dockerBashFunction() {
