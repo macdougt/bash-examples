@@ -1,32 +1,134 @@
 #!/usr/bin/perl
 
-my $dirEnding = shift;
+# Accept three types of input that perform
+# three different actions
+# word or regex -> first look for a matching tag if they exist
+#                  next look through the directory history for a match
+#                  on the lowest directory
+# negative number -m -> go up the directory tree by m steps or to the root
+#                       if m is greater than the number of directories
+#                       in the current path
+#
+# positive number n -> go to the directory history's nth entry
+#
+
+my $cdInput = shift;
+
+# The file that stores the directory history
 my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
 
-open DH, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
-
-# List matches
-my @matches;
-while(my $dir = <DH>) {
-	chomp($dir);
-	if ($dir =~ /.*\/[^\/]*?$dirEnding[^\/]*/i) {
-		push(@matches, $dir);
-	}
+# This case assumes that the user is looking to match a directory
+# or wants the nth directory in the directory history
+# Both open and iterate through the history file
+if ($cdInput !~ /^\s*-?\d+\s*$/) {  # not a number
+   if (! &printMatchingTag($cdInput)) {  #first check for tag match
+      open DH, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
+      &printMatchingLines(\*DH, $cdInput);
+      close DH;
+   }
+} elsif ($cdInput > 0) {
+   open DH, "<$dirHistoryFile" || die "Cannot open $dirHistoryFile: $!";
+   print &getNthLine(\*DH, $cdInput);
+   close DH;
+} elsif ($cdInput < 0) {
+   # Move up the directory tree by cdInput steps or to the root
+   my $dirJump = -$cdInput;
+   print &getHigherDir($dirJump);
+} elsif ($cdInput == 0) {
+   print STDERR "0 does not move you...\n";
 }
-close DH;
 
-if ($#matches > 0) {
-	print STDERR "Matches:\n";
-	for (my $i=0; $i <= $#matches; $i++) {
-	   print STDERR ($i+1);
-	   print STDERR ") $matches[$i]\n";
-	}
-	print STDERR "Pick the directory\n";
-	my $choice = <>;
+# Check the directory tag file for a match
+sub printMatchingTag {
+   my $matchString = shift;
+   my $retVal;
+   my $dirTagsFile = $ENV{"HOME"}."/.dirtags";
 
-	print "$matches[$choice-1]";
-} elsif ($#matches == 0) {
-	print "$matches[0]";
-} else {
-	print STDERR "No matches\n";
+   if (-f $dirTagsFile) {
+      open DT, "<$dirTagsFile" || die "Cannot open $dirTagsFile: $!";
+      while (<DT>) {
+         if (/^(\w+):(.*)/) {   # format <tag>:<directory>
+            my $tag = $1;
+            my $dir = $2;
+            if ($matchString eq $tag) {
+               print $dir;
+               $retVal = 1;
+            }
+         }
+      }
+      close DT;
+   }
+   return $retVal;
+}
+
+# Return the directory n steps above the currect directory
+sub getHigherDir {
+   my $dirJump = shift;
+   # Move up the directory tree by cdInput steps or to the root
+   use Cwd;
+   my $cwd = getcwd();
+   # Remove the trailing directories
+   my @curDirs = split("/", $cwd);
+   if ($#curDirs > $dirJump) {
+      return join("/", @curDirs[0..($#curDirs-$dirJump)]);
+   } else {
+      return "/";
+   }
+}
+
+# Print lines matching the match string from the file
+# with file handle fh
+sub printMatchingLines {
+   my $fh = shift;
+   my $matchString = shift;
+   # List matches
+   my @matches;
+   while(my $dir = <$fh>) {
+        chomp($dir);
+        if ($dir =~ /.*\/(.*)$/) {
+           my $lastDir = $1;
+           if ($lastDir =~ /$matchString/) {
+              push(@matches, $dir);
+           }
+        }
+   }
+   printPick(\@matches);
+}
+
+# Print an interactive choice from a given list
+sub printPick {
+   my $ra_list = shift;
+   if ($#{$ra_list} > 0) {
+        print STDERR "List:\n";
+        for (my $i=0; $i <= $#{$ra_list}; $i++) {
+           print STDERR ($i+1);
+           print STDERR ") $$ra_list[$i]\n";
+        }
+        print STDERR "Make your choice\n";
+        my $choice = <>;
+        if ($choice =~ /\d+/) {
+           print "$$ra_list[$choice-1]";
+        }
+   } elsif ($#{$ra_list} == 0) {
+        print "$$ra_list[0]";
+   } else {
+        print STDERR "No list\n";
+   }
+}
+
+
+# Return the nth line from file with file handle fh
+sub getNthLine {
+   my $fh = shift;
+   my $n = shift;
+   my $dir;
+
+   # Skip to the specified line and return its contents
+   while($dir = <$fh>) {
+      if ($. == $n) {
+         chomp($dir);
+         last;
+      }
+   }
+   return $dir;
 }
