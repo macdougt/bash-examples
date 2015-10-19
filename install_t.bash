@@ -76,6 +76,8 @@ fi
 # Grab the files
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bash_aliases -O .bash_aliases
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bashrc -O .bashrc
+
+# Grab the bash utilities
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/appendif -O appendif
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cdn -O cdn
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/getDir -O getDir
@@ -83,17 +85,21 @@ wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/clean
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/list -O list
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bu -O bu
 
-chmod +x appendif cdn getDir cleandh list bu
+# Grab the docker utilities
+wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docb -O docb
+wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docs -O docs
+
+chmod +x appendif cdn getDir cleandh list bu docb docs
 
 # Move the files if necessary
 if [[ "$PWD" != "$HOME" ]]
 then
+   # TODO back up the bashrc and bash aliases files in a non-destructive way
    mv .bashrc $HOME 
    mv .bash_aliases $HOME
 fi
 
-mv appendif cdn getDir cleandh list bu /usr/local/bin
+mv appendif cdn getDir cleandh list bu docb docs /usr/local/bin
 
 # Get rid of the temporary directory
 rmdir $mytmpdir
-
