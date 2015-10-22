@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+# 
+# Use vi with locate pick list
+#
+# Usage:
+#   vloc <search term> <regular expression>
+#
+# Sample usage:
+#   vloc Dockerfile
+#
+
+my $command;
+my $search_term = shift;
+if ($search_term) {
+   $command = "locate $search_term";
+
+   open (PIPE, "$command |") || die "Sorry, I couldn't open pipe.\n";
+   while (<PIPE>) {
+      chomp($_);
+      push(@list, $_);
+   }
+   close PIPE;
+
+   my $chosen_file = &getPick(\@list);
+   print "Opening $chosen_file in vim...\n";
+   system "vim $chosen_file";
+} else {
+   &usage();
+}
+
+# Print usage
+sub usage {
+my $USAGE = <<"USAGE";
+Usage: 
+    vloc <search term>
+
+Sample usage:
+    vloc Dockerfile
+
+The sample will return a list of all files matching Dockerfile and 
+allow the user to choose one to be opened in vim.
+
+USAGE
+}
+
+# Print an interactive choice from a given list
+sub getPick {
+   my $ra_list = shift;
+   if ($#{$ra_list} > 0) {
+        print STDERR "List:\n";
+        for (my $i=0; $i <= $#{$ra_list}; $i++) {
+           print STDERR ($i+1);
+           print STDERR ") $$ra_list[$i]\n";
+        }
+        print STDERR "Make your choice\n";
+        my $choice = <>;
+        if ($choice =~ /\d+/) {
+           return $$ra_list[$choice-1];
+        }
+   } elsif ($#{$ra_list} == 0) {
+        return $$ra_list[0];
+   } else {
+        print STDERR "No list\n";
+   }
+}
