@@ -48,15 +48,11 @@ alias dls='docker images;docker ps -a'
 alias dockerls='docker images;docker ps -a'
 alias dockerlsc='docker ps -a'
 alias dockerkillexit='docker ps -aq -f status=exited | xargs docker rm'
+alias dockerbash=docb
+alias dockerstart=docs
 
 
 # Docker functions
-function dockerBashFunction() {
-   docker exec -i -t $1 bash
-}
-
-alias dockerbash=dockerBashFunction
-alias docb='dockerbash'
 
 function dockerCleanFunction() {
    docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
@@ -64,14 +60,9 @@ function dockerCleanFunction() {
 
 alias dockerclean=dockerCleanFunction
 
-function dockerStartFunction() {
-   docker run -i -t $1 /bin/bash
-}
-
-alias dockerstart=dockerStartFunction
 
 function dockerKillFunction() {
-   docker stop $1;docker rm $1
+   docker stop $*;docker rm $*1
 }
 
 alias dockerkill=dockerKillFunction
