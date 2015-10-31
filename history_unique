@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+
+# Script that can be used in pipe
+
+# Hash used to kept for uniqueness
+my %unique_lines;
+
+# The following line allows piped input
+# Each line of input will be pushed to the hash 
+while (<>) {
+   if (/^\s*(\d+)\s+(.*)/) {
+      $unique_lines{$2} = $1; 
+   }  
+}
+
+for my $k (sort { $unique_lines{$a} <=> $unique_lines{$b} } keys %unique_lines) {
+    print "$unique_lines{$k} $k\n";
+}
+

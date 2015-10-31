@@ -5,8 +5,6 @@
 alias a='alias'
 alias c='clear'
 alias g='grep'
-alias gh='history | grep $@'
-alias h='history'
 alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -al'
@@ -24,6 +22,17 @@ alias lcoate='locate'
 alias loc='locate'
 alias uloc='updatedb; locate '
 
+# history
+function history_function() {
+   if [ $# -eq 0 ]
+     then
+     builtin history;
+   else
+     builtin history | grep $* | history_unique ;
+   fi   
+}
+alias gh='history | grep $@'
+alias h=history_function
 
 # Tracking - bbh
 alias bbh='list ~/.bash_big_history'
