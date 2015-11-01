@@ -1,0 +1,23 @@
+#!/usr/bin/env perl
+
+# Script that can be used in pipe
+
+# Hash used to kept for uniqueness
+my %unique_lines;
+
+# The following line allows piped input
+# Each line of input will be pushed to the hash 
+# Sample line for bbh ouput
+#    1480) [25386 vagrant 1446390647 "Sun Nov  1 15:10:47 UTC 2015"] history
+#
+
+while (<>) {
+   if (/^\s*(\d+)\)\s+[^\]]+\]\s*(.*)/) {
+      $unique_lines{$2} = $1; 
+   }
+}
+
+for my $k (sort { $unique_lines{$a} <=> $unique_lines{$b} } keys %unique_lines) {
+    print "$unique_lines{$k} $k\n";
+}
+

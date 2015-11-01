@@ -26,7 +26,7 @@ alias uloc='updatedb; locate '
 function history_function() {
    if [ $# -eq 0 ]
      then
-     builtin history;
+     builtin history | history_unique ;
    else
      builtin history | grep $* | history_unique ;
    fi   
@@ -35,7 +35,15 @@ alias gh='history | grep $@'
 alias h=history_function
 
 # Tracking - bbh
-alias bbh='list ~/.bash_big_history'
+function bbh_function() {
+   if [ $# -eq 0 ]
+     then
+     list ~/.bash_big_history | bbh_unique ;
+   else
+     list ~/.bash_big_history | grep $* | bbh_unique ;
+   fi
+}
+alias bbh=bbh_function
 
 
 # dirhistory
@@ -71,7 +79,7 @@ alias dockerclean=dockerCleanFunction
 
 
 function dockerKillFunction() {
-   docker stop $*;docker rm $*1
+   docker stop $*;docker rm $*
 }
 
 alias dockerkill=dockerKillFunction
