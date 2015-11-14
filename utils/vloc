@@ -3,24 +3,30 @@
 # Use vi with locate pick list
 #
 # Usage:
-#   vloc <search term> <regular expression>
+#   vloc <locate term> [regex governing lines]
 #
 # Sample usage:
-#   vloc Dockerfile
+#   vloc Dockerfile \/Dockerfile$
 #
 
-my $command;
-my $search_term = shift;
-if ($search_term) {
-   $command = "locate $search_term";
+my $locate_term = shift;
+my $locate_regex = shift; # Optional
+
+if ($locate_term) {
+   my $command = "locate $locate_term";
 
    open (PIPE, "$command |") || die "Sorry, I couldn't open pipe.\n";
    while (<PIPE>) {
       chomp($_);
-      push(@list, $_);
+      if ($locate_regex) {
+         if ($_ =~ /$locate_regex/) {
+            push(@list, $_);
+         }
+      } else {
+         push(@list, $_);
+      }
    }
-   close PIPE;
-
+close PIPE;
    my $chosen_file = &getPick(\@list);
    print "Opening $chosen_file in vim...\n";
    system "vim $chosen_file";
