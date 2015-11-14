@@ -1,0 +1,17 @@
+#!/usr/bin/env perl
+
+my $command = "ifconfig";
+
+open (PIPE, "$command |") || die "Sorry, I couldn't open pipe.\n";
+  my $cur_int;
+  while (<PIPE>) {
+     if (/^(\w+)/) {
+        $cur_int = $1;
+     } elsif (/\s+inet addr:([\d.]+)/) {
+        my $cur_ip = $1;
+        print "$cur_int: $cur_ip\n";
+     }
+
+  }
+
+close PIPE;
