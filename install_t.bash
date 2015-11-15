@@ -90,12 +90,13 @@ wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bu -O
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/history_unique -O history_unique
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bbh_unique -O bbh_unique
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/ips -O ips
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/vloc -O vloc
 
 # Grab the docker utilities
 wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docb -O docb
 wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docs -O docs
 
-chmod +x appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips update_installer 
+chmod +x appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc update_installer 
 
 # Move the files if necessary
 if [[ "$PWD" != "$HOME" ]]
@@ -105,7 +106,7 @@ then
    mv .bash_aliases $HOME
 fi
 
-mv appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips update_installer /usr/local/bin
+mv appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc update_installer /usr/local/bin
 
 # Get rid of the temporary directory
 rmdir $mytmpdir
