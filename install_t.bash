@@ -76,8 +76,14 @@ fi
 
 
 # Grab the files
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.profile -O .profile
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bash_aliases -O .bash_aliases
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bashrc -O .bashrc
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.docker_content -O .docker_content
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.dirh_content -O .dirh_content
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.hist_content -O .hist_content
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bbh_content -O .bbh_content
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.dm_content -O .dm_content
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/update_installer -O update_installer 
 
 # Grab the bash utilities
