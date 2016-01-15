@@ -29,7 +29,7 @@ function dockerMachineConnect() {
 alias dmc=dockerMachineConnect
 
 function dockerMachineClean() {
-  docker-machine kill $(docker-machine ls -q)
+  docker-machine stop $(docker-machine ls -q)
   docker-machine rm -f $(docker-machine ls -q)
 }
 
