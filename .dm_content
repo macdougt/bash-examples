@@ -1,0 +1,38 @@
+# Docker machine functions
+alias dm='docker-machine' 
+
+function dockerMachineSwarmInfo() {
+   eval $(docker-machine env --swarm swarm-master)
+   echo "From the swarm-master:"
+   echo ""
+   docker-machine ls
+   docker info
+   docker ps -a
+
+   for machine in $(docker-machine ls -q); do echo "";echo "Info for $machine";eval "$(docker-machine env $machine)";docker images;docker ps -a;done
+}
+
+alias dminfo=dockerMachineSwarmInfo
+
+function dockerMachineSwarmConnect() {
+   eval $(docker-machine env --swarm $1)
+   docker-machine ls
+}
+
+alias dms=dockerMachineSwarmConnect
+
+function dockerMachineConnect() {
+   eval $(docker-machine env $1)
+   docker-machine ls
+}
+
+alias dmc=dockerMachineConnect
+
+function dockerMachineClean() {
+  docker-machine kill $(docker-machine ls -q)
+  docker-machine rm -f $(docker-machine ls -q)
+}
+
+alias dmclean=dockerMachineClean
+
+

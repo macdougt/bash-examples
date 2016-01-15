@@ -1,0 +1,24 @@
+# Not ideal but it will append the last command to a common history file
+# this will leave the last commands in each terminal unadded
+# TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
+# contribute
+
+BIG_HISTORY="~/.bash_big_history"
+
+get_last() {
+    echo -n "[$$ $(whoami) $(date +'%s') \"$(date)\"] "
+    fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//'
+}
+
+PROMPT_COMMAND="get_last>> $BIG_HISTORY"
+
+# Tracking - bbh
+function bbh_function() {
+   if [ $# -eq 0 ]
+     then
+     list $BIG_HISTORY | bbh_unique ;
+   else
+     list $BIG_HISTORY | grep $* | bbh_unique ;
+   fi
+}
+alias bbh=bbh_function

@@ -1,0 +1,11 @@
+# history
+function history_function() {
+   if [ $# -eq 0 ]
+     then
+     builtin history | history_unique ;
+   else
+     builtin history | grep $* | history_unique ;
+   fi   
+}
+alias gh='history | grep $@'
+alias h=history_function
