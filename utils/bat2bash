@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+
+# Pick up file as first arg
+my $file = shift;
+
+if ($file !~ /.bat$/) {
+        die "No batch file specified\n";
+}
+
+my $out_file = $file;
+$out_file =~ s/bat/bash/;
+
+open (FILE, "< $file") || die "Sorry, I couldn't read $file.\n";
+open (OUTFILE, "> $out_file") || die "Sorry, I couldn't write $out_file.\n";
+
+while (<FILE>) {
+        s/^\s*REM/\#/; # translate comments
+        s/^\s*SET\s*//g; # translate setting of variables
+        s/\%(\w+)\%/\$$1/g; # translate variables
+        s/\s*\@.*//; # remove DOS instructions
+        #s///g; # translate variables
+        #s///g; # translate variables
+        print OUTFILE $_;
+}
+close OUTFILE;
+close FILE;
+
