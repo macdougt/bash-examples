@@ -113,6 +113,7 @@ then
 fi
 
 mv appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc update_installer /usr/local/bin
+mv .profile .bash_aliases .bashrc .docker_content .dirh_content .hist_content .bbh_content .dm_content ~
 
 # Get rid of the temporary directory
 rmdir $mytmpdir
