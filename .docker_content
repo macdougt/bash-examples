@@ -17,7 +17,6 @@ alias dockerkill=dockerKillFunction
 
 # Aliases
 
-alias docker='/c/pInstalls/DockerToolbox/docker'
 alias dockerkillall='docker stop $(docker ps -a -q);docker rm $(docker ps -a -q)'
 alias dls='docker images;docker ps -a'
 alias dockerls='docker images;docker ps -a'
