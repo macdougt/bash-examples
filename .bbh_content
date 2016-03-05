@@ -3,7 +3,7 @@
 # TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
 # contribute
 
-BIG_HISTORY="~/.bash_big_history"
+BIG_HISTORY="$HOME/.bash_big_history"
 
 get_last() {
     echo -n "[$$ $(whoami) $(date +'%s') \"$(date)\"] "

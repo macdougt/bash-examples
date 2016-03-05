@@ -5,6 +5,7 @@
 alias a='alias'
 alias c='clear'
 alias g='grep'
+# Not for MAC
 alias ls='ls -F --color=never --show-control-chars'
 alias l='ls -CF'
 alias la='ls -A'
