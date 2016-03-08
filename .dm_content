@@ -22,7 +22,7 @@ function dockerMachineSwarmConnect() {
 alias dms=dockerMachineSwarmConnect
 
 function dockerMachineConnect() {
-   eval $(docker-machine env $1)
+   eval $(dm_connect)
    docker-machine ls
 }
 
