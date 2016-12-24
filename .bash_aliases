@@ -24,3 +24,10 @@ alias lcoate='locate'
 alias loc='locate'
 alias uloc='updatedb; locate '
 
+function findWithin() {
+  locate $1 | grep $1\$ | xargs grep $2 
+}
+
+alias fw=findWithin
+alias findwithin=findWithin
+
