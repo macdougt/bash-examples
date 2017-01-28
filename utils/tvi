@@ -1,0 +1,177 @@
+#!/usr/bin/env perl
+
+use File::Spec;
+
+my $command;
+my $file      = shift;
+my $locater   = 'locate';
+my $system_vi = '/usr/bin/vi';
+
+# Create the edit history file if necessary
+my $edit_history = $ENV{"HOME"} . "/.edit_history";
+
+# Create the edit history file if it does not already exist
+if ( !-f $edit_history ) {
+    &touch($edit_history);
+}
+
+# Did the user include any input?
+if ($file !~ /\w/) {
+    # Read the edit history and present last 10
+    my $ra_list = &get_list_from_file($edit_history);
+    my $chosen_file = &getPick( $ra_list );
+    if ($chosen_file == 808) {
+       print "No choice made\n";
+       exit 0;
+    }
+
+    &check_writability_edit( $chosen_file, $edit_history );
+    exit 0;
+}
+
+
+if ( -f "$file" ) {
+    &check_writability_edit( "$file", $edit_history );
+
+}
+else {
+    # Look for exact match
+    $command = "$locater $file | grep $file\$";
+
+    open( PIPE, "$command |" ) || die "Sorry, I couldn't open pipe.\n";
+    while (<PIPE>) {
+        chomp($_);
+        push( @list, $_ );
+    }
+    close PIPE;
+
+    my $chosen_file = &getPick( \@list );
+    if ( $chosen_file == 808 ) {
+
+        # No exact match so try to match all
+        print STDERR "Do you want me to run:\n";
+        my @commands = ("$locater $file");
+        for ( my $i = 0 ; $i <= $#commands ; $i++ ) {
+            print STDERR ( $i + 1 );
+            print STDERR ") $commands[$i]\n";
+        }
+        my $choice = <>;
+        if ( $choice =~ /\d+/ ) {
+            system( $commands[ $choice - 1 ] );
+        }
+        exit;
+    }
+    &check_writability_edit( $chosen_file, $edit_history );
+}
+
+sub get_list_from_file {
+    my $file = shift;
+    open(FILE, "< $file") or die "I cannot open $file\n";
+      while (<FILE>) {
+         chomp;
+         push(@content_list, $_);
+      }
+    close FILE;
+    return \@content_list;
+}
+
+sub touch {
+    my $filename = shift;
+    open HANDLE, ">$filename" || die;
+    close HANDLE;
+}
+
+# Print an interactive choice from a given list
+sub getPick {
+    my $ra_list = shift;
+    if ( $#{$ra_list} > 0 ) {
+        print STDERR "List:\n";
+        for ( my $i = 0 ; $i <= $#{$ra_list} ; $i++ ) {
+            print STDERR ( $i + 1 );
+            print STDERR ") $$ra_list[$i]\n";
+        }
+        print STDERR "Make your choice\n";
+        my $choice = <>;
+        if ( $choice =~ /\d+/ ) {
+            return $$ra_list[ $choice - 1 ];
+        }
+    }
+    elsif ( $#{$ra_list} == 0 ) {
+        return $$ra_list[0];
+    }
+    else {
+        print STDERR "No list\n";
+    }
+    return 808;
+}
+
+sub append_to_data_store {
+    my $data_to_be_added = shift;
+    my $data_file = shift;
+
+    # Store the data
+    my @data;
+
+    # Read the contents of the data store 
+    open DS, "<$data_file" || die "Cannot open $data_file: $!";
+
+    # Recreate the list
+    while ( my $line_data= <DS> ) {
+        chomp($line_data);
+        if ( $line_data ne $data_to_be_added ) {
+            push( @data, $line_data );
+        }
+    }
+    close DS;
+
+    # Add the current data to the end of the list
+    push( @data, $data_to_be_added );
+
+    # Overwrite the directory history file with the updated list
+    open DS_FINAL, ">$data_file"
+      or die "Could not open file '$data_file' $!";
+    my $i = 0;
+    while ( $i <= $#data ) {
+        print DS_FINAL "$data[$i]\n";
+        $i++;
+    }
+    close DS_FINAL;
+}
+
+sub check_writability_edit {
+    my $file              = shift;
+    my $edit_history_file = shift;
+    my $command = "$system_vi $file";
+    my $message;
+
+    # Check the writability, we might need to sudo
+    if ( !-w "$file" ) {
+        print
+"The current user $ENV{USER} does not have write permission for $file.\n";
+        print "Do you want to open it read-only or upgrade to root (r/u)?\n";
+        print "Any other answer will quit.\n";
+        my $choice = <>;
+        chomp($choice);
+
+        if ( $choice eq "r" ) {
+            $message = "Opening current directory's $file read-only.\n";
+        }
+        elsif ( $choice eq "u" ) {
+            $command = "sudo $system_vi $file";
+            $message = "Opening current directory's $file with sudo.\n";
+        }
+        else {
+            print "Not opening $file\n";
+            return;
+        }
+    }
+
+    if ( $command =~ /\w/ ) {
+        print $message;
+        #sleep(1);
+        system($command);
+        # Always append the fully qualified file path
+        append_to_data_store(File::Spec->rel2abs($file), $edit_history_file);
+    }
+}
+
