@@ -97,13 +97,14 @@ wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/histo
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bbh_unique -O bbh_unique
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/ips -O ips
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/vloc -O vloc
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/tvi -O tvi
 
 # Grab the docker utilities
 wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docb -O docb
 wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docs -O docs
 wget https://raw.githubusercontent.com/macdougt/docker-machine-examples/master/dm_connect -O dm_connect
 
-chmod +x appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc dm_connect update_installer 
+chmod +x appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc dm_connect tvi update_installer 
 
 # Move the files if necessary
 if [[ "$PWD" != "$HOME" ]]

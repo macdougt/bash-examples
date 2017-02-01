@@ -1,6 +1,7 @@
 # dirhistory
 alias dh='list ~/.dirhistory'
 alias sdh='dh | grep $@'
+alias cdl='cd `tail -2 ~/.dirhistory | head -1`'
 # Override cd - change directory
 function cd() { builtin cd "$@" && appendif `pwd`;}
 export -f cd
