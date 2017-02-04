@@ -3,7 +3,13 @@
 # Docker functions
 
 function dockerCleanFunction() {
-   docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
+   unconnected_images=$(docker images | grep "^<none>" | awk '{print $3}')
+   if [ -z "$unconnected_images" ]
+   then
+      echo "Nothing to clean"
+   else
+      docker rmi $unconnected_image
+   fi
 }
 
 alias dockerclean=dockerCleanFunction

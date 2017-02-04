@@ -1,5 +1,15 @@
 # dirhistory
-alias dh='list ~/.dirhistory'
+
+function dirHistoryFunction() {
+   if [ -z "$1" ]
+   then
+      list ~/.dirhistory
+   else
+      list ~/.dirhistory | grep $*
+   fi
+}
+
+alias dh=dirHistoryFunction
 alias sdh='dh | grep $@'
 alias cdl='cd `tail -2 ~/.dirhistory | head -1`'
 # Override cd - change directory
