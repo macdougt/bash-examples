@@ -7,10 +7,10 @@ alias c='clear'
 alias g='grep'
 
 # Not for MAC
-if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-   alias ls='ls -F --color=never --show-control-chars'
-else
+if [ "$(uname)" == "Darwin" ]; then
    alias ls='ls -CF'
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+   alias ls='ls -F --color=never --show-control-chars'
 fi
 
 alias l='ls -CF'
