@@ -105,7 +105,14 @@ wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docb -O d
 wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docs -O docs
 wget https://raw.githubusercontent.com/macdougt/docker-machine-examples/master/dm_connect -O dm_connect
 
-chmod +x appendif cdn getDir cleandh cd_to_file list bu history_unique bbh_unique docb docs ips vloc dm_connect tvi update_installer 
+
+UTILITIES="appendif cdn getDir cleandh cd_to_file list bu history_unique bbh_unique docb docs ips vloc dm_connect tvi update_installer"
+
+chmod +x $UTILITIES
+
+PRIMARY_GROUP=$(id -g -n $USER)
+chown $USER:$PRIMARY_GROUP $UTILITIES 
+
 
 # Move the files if necessary
 if [[ "$PWD" != "$HOME" ]]
@@ -115,7 +122,7 @@ then
    mv .bash_aliases $HOME
 fi
 
-mv appendif cdn getDir cleandh list bu history_unique bbh_unique docb docs ips vloc tvi cd_to_file dm_connect update_installer /usr/local/bin
+mv $UTILITIES /usr/local/bin
 mv .profile .bash_aliases .bashrc .docker_content .dirh_content .hist_content .bbh_content .dm_content ~
 
 # Get rid of the temporary directory
