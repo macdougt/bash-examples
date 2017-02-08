@@ -5,11 +5,17 @@
 alias a='alias'
 alias c='clear'
 alias g='grep'
+
 # Not for MAC
-alias ls='ls -F --color=never --show-control-chars'
+if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+   alias ls='ls -F --color=never --show-control-chars'
+else
+   alias ls='ls -CF'
+fi
+
 alias l='ls -CF'
 alias la='ls -A'
-alias lal='ls -alh'
+alias lal='ls -alhtr'
 alias ll='ls -lhtr'
 alias s='source ~/.profile'
 alias u='unalias'
