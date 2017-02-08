@@ -24,7 +24,9 @@ function bbh_function() {
 alias bbh=bbh_function
 
 function bbr_function() {
-   `bbh | grep $1 | cut -d' ' -f2-`
+   command_to_run=$(bbh_function | grep ^"$1 " | cut -d' ' -f2-)
+   echo "$command_to_run"
+   $command_to_run
 }
 alias bbr=bbr_function
 
