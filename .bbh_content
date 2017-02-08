@@ -22,3 +22,13 @@ function bbh_function() {
    fi
 }
 alias bbh=bbh_function
+
+function bbr_function() {
+   `bbh | grep $1 | cut -d' ' -f2-`
+}
+alias bbr=bbr_function
+
+
+
+
+

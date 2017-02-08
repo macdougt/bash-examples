@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+
+my $file = shift;
+my $number = shift;
+
+open FILE_WITH_LIST, "<$file" || die "Cannot open $file: $!";
+
+# Print the item from list with index
+while( <FILE_WITH_LIST> ) {
+    if( $. == $number ) { 
+        print $_;
+        last;
+    }
+}
+close FILE_WITH_LIST;
+

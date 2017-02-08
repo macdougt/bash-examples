@@ -11,7 +11,7 @@ alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -alh'
 alias ll='ls -lhtr'
-alias s='source ~/.bashrc'
+alias s='source ~/.profile'
 alias u='unalias'
 alias valias='vi ~/.bash_aliases'
 alias vil='vi `fc -s`'
@@ -24,10 +24,19 @@ alias lcoate='locate'
 alias loc='locate'
 alias uloc='updatedb; locate '
 
-function findWithin() {
+function locate_exact_function() {
+  locate $1 | grep $1\$
+}
+alias locate_exact=locate_exact_function
+alias le=locate_exact_function
+
+function find_within_function() {
   locate $1 | grep $1\$ | xargs grep $2 
 }
+alias fw=find_within_function
+alias findwithin=find_within_function
 
-alias fw=findWithin
-alias findwithin=findWithin
-
+function find_below_function() {
+   find . -name "$1"
+}
+alias fb=find_below_function

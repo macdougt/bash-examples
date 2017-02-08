@@ -1,15 +1,14 @@
 #!/usr/bin/env perl
 
 my $file = shift;
-my @dirs;
 
-open DH2, "<$file" || die "Cannot open file: $!";
+open FILE_WITH_LIST, "<$file" || die "Cannot open $file: $!";
 
 # Print the list with index
 my $count = 1;
-while(my $dir = <DH2>) {
-	print "$count) $dir";
+while(my $item = <FILE_WITH_LIST>) {
+	print "$count) $item";
 	$count++;
 }
-close DH2;
+close FILE_WITH_LIST;
 
