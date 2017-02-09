@@ -46,3 +46,7 @@ function find_below_function() {
    find . -name "$1"
 }
 alias fb=find_below_function
+
+alias eh="list ~/.edit_history"
+
+

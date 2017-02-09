@@ -74,44 +74,51 @@ else
         echo "perl installed already"
 fi
 
+DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content')
+UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'update_installer')
+DOCKER_UTILITIES=('docb' 'docs')
+DOCKER_MACHINE_UTILITIES=('dm_connect')
 
-# Grab the files
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.profile -O .profile
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bash_aliases -O .bash_aliases
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bashrc -O .bashrc
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.docker_content -O .docker_content
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.dirh_content -O .dirh_content
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.hist_content -O .hist_content
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.bbh_content -O .bbh_content
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/.dm_content -O .dm_content
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/update_installer -O update_installer 
+JOIN_DOT_FILES=$(echo ${DOT_FILES[@]})
+JOIN_UTILITIES=$(echo ${UTILITIES[@]})
+JOIN_DOCKER_UTILITIES=$(echo ${DOCKER_UTILITIES[@]})
+JOIN_DOCKER_MACHINE_UTILITIES=$(echo ${DOCKER_MACHINE_UTILITIES[@]})
+
+# Grab the dot files 
+for DOT_FILE in "${DOT_FILES[@]}"
+do
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/$DOT_FILE -O $DOT_FILE 
+done
 
 # Grab the bash utilities
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/appendif -O appendif
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cdn -O cdn
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/getDir -O getDir
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cleandh -O cleandh
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/list -O list
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bu -O bu
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/history_unique -O history_unique
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/bbh_unique -O bbh_unique
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/ips -O ips
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/vloc -O vloc
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/tvi -O tvi
-wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/cd_to_file -O cd_to_file
+for UTIL in "${UTILITIES[@]}"
+do
+wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/$UTIL -O $UTIL 
+done
 
 # Grab the docker utilities
-wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docb -O docb
-wget https://raw.githubusercontent.com/macdougt/docker-examples/master/docs -O docs
-wget https://raw.githubusercontent.com/macdougt/docker-machine-examples/master/dm_connect -O dm_connect
+for DOCKER_UTIL in "${DOCKER_UTILITIES[@]}"
+do
+wget https://raw.githubusercontent.com/macdougt/docker-examples/master/$DOCKER_UTIL -O $DOCKER_UTIL 
+done
+
+# Grab the docker machine utilities
+for DOCKER_MACHINE_UTIL in "${DOCKER_MACHINE_UTILITIES[@]}"
+do
+wget https://raw.githubusercontent.com/macdougt/docker-machine-examples/master/$DOCKER_MACHINE_UTIL -O $DOCKER_MACHINE_UTIL 
+done
+
+chmod +x $JOIN_UTILITIES
+chmod +x $JOIN_DOCKER_UTILITIES
+chmod +x $JOIN_DOCKER_MACHINE_UTILITIES
 
 
-UTILITIES="appendif cdn getDir cleandh cd_to_file list bu history_unique bbh_unique docb docs ips vloc dm_connect tvi update_installer"
-
-chmod +x $UTILITIES
-
-PRIMARY_GROUP=$(id -g -n $USER)
-chown $USER:$PRIMARY_GROUP $UTILITIES 
+SUDOING_USER=$(logname)
+PRIMARY_GROUP=$(id -g -n $SUDOING_USER)
+chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOT_FILES 
+chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_UTILITIES 
+chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES 
+chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
 
 
 # Move the files if necessary
@@ -122,8 +129,10 @@ then
    mv .bash_aliases $HOME
 fi
 
-mv $UTILITIES /usr/local/bin
-mv .profile .bash_aliases .bashrc .docker_content .dirh_content .hist_content .bbh_content .dm_content ~
+mv $JOIN_DOT_FILES $HOME
+mv $JOIN_UTILITIES /usr/local/bin
+mv $JOIN_DOCKER_UTILITIES /usr/local/bin
+mv $JOIN_DOCKER_MACHINE_UTILITIES /usr/local/bin
 
 # Get rid of the temporary directory
 rmdir $mytmpdir
