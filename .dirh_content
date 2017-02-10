@@ -14,7 +14,15 @@ alias sdh='dh | grep $@'
 alias cdl='cd `tail -2 ~/.dirhistory | head -1`'
 
 # Override cd - change directory
-function cd() { builtin cd "$@" && appendif `pwd`;}
+function cd() { 
+   if [ -f "$1" ]
+   then
+      dir=$(dirname $1)
+      builtin cd "$dir" && appendif `pwd`;
+   else
+      builtin cd "$@" && appendif `pwd`;
+   fi
+}
 export -f cd
 function cn() { cd `cdn $1`; }
 export -f cn
