@@ -49,4 +49,8 @@ alias fb=find_below_function
 
 alias eh="list ~/.edit_history"
 
+function title {
+    echo -ne "\033]0;"$*"\007"
+}
+
 
