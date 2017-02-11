@@ -8,7 +8,7 @@ function dockerCleanFunction() {
    then
       echo "Nothing to clean"
    else
-      docker rmi $unconnected_image
+      docker rmi $unconnected_images
    fi
 }
 
