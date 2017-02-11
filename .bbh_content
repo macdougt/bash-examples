@@ -6,7 +6,8 @@
 BIG_HISTORY="$HOME/.bash_big_history"
 
 get_last() {
-    echo -n "[$$ $(whoami) $(date +'%s') \"$(date)\"] "
+    #echo -n "[$$ $(whoami) $(hostname) $(pwd) $(date +'%s') \"$(date)\" $(tty)] "
+    echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] "
     fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//'
 }
 
