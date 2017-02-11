@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 
 use File::Spec;
+use File::Basename;
 
 my $command;
 my $file      = shift;
@@ -19,7 +20,7 @@ if ( !-f $edit_history ) {
 if ($file !~ /\w/) {
     # Read the edit history and present last 10
     my $ra_list = &get_list_from_file($edit_history);
-    my $chosen_file = &getPick( $ra_list );
+    my $chosen_file = &getPick( $ra_list, $file );
     if ($chosen_file == 808) {
        print "No choice made\n";
        exit 0;
@@ -45,7 +46,7 @@ else {
     }
     close PIPE;
 
-    my $chosen_file = &getPick( \@list );
+    my $chosen_file = &getPick( \@list, $file );
     if ( $chosen_file == 808 ) {
 
         # No exact match so try to match all
@@ -84,6 +85,7 @@ sub touch {
 # Print an interactive choice from a given list
 sub getPick {
     my $ra_list = shift;
+    my $file = shift; # include file, may want to create it
     if ( $#{$ra_list} > 0 ) {
         print STDERR "List:\n";
         for ( my $i = 0 ; $i <= $#{$ra_list} ; $i++ ) {
@@ -94,6 +96,10 @@ sub getPick {
         my $choice = <>;
         if ( $choice =~ /\d+/ ) {
             return $$ra_list[ $choice - 1 ];
+        } elsif ($choice =~ /\w+/) {
+            # If the file does not exist locally then create it
+            # otherwise open the current directory version
+            return $choice;
         }
     }
     elsif ( $#{$ra_list} == 0 ) {
@@ -101,6 +107,7 @@ sub getPick {
     }
     else {
         print STDERR "No list\n";
+        return $file;
     }
     return 808;
 }
@@ -144,34 +151,59 @@ sub check_writability_edit {
     my $command = "$system_vi $file";
     my $message;
 
-    # Check the writability, we might need to sudo
-    if ( !-w "$file" ) {
-        print
-"The current user $ENV{USER} does not have write permission for $file.\n";
-        print "Do you want to open it read-only or upgrade to root (r/u)?\n";
-        print "Any other answer will quit.\n";
-        my $choice = <>;
-        chomp($choice);
+    # Check if the file exists, if not
+    # check the current directory's writability
+    if ( !-e "$file") {
+       my $dirname  = dirname($file);
 
-        if ( $choice eq "r" ) {
-            $message = "Opening current directory's $file read-only.\n";
-        }
-        elsif ( $choice eq "u" ) {
-            $command = "sudo $system_vi $file";
-            $message = "Opening current directory's $file with sudo.\n";
-        }
-        else {
-            print "Not opening $file\n";
-            return;
-        }
+       if (! -w $dirname) {
+          my $choice = &grant_writability($dirname);
+          if ( $choice eq "r" ) {
+             $message = "Opening current directory's $file read-only.\n";
+          } elsif ( $choice eq "u" ) {
+             $command = "sudo $system_vi $file";
+             $message = "Opening current directory's $file with sudo.\n";
+          } else {
+             print "Not opening $file\n";
+             return;
+          } 
+       }
+    } else {
+       # Check the writability, we might need to sudo
+       if ( !-w "$file" ) {
+           my $choice = &grant_writability($file);
+           if ( $choice eq "r" ) {
+              $message = "Opening current directory's $file read-only.\n";
+           }
+           elsif ( $choice eq "u" ) {
+              $command = "sudo $system_vi $file";
+              $message = "Opening current directory's $file with sudo.\n";
+           }
+           else {
+              print "Not opening $file\n";
+              return;
+           }
+       }
     }
 
     if ( $command =~ /\w/ ) {
-        print $message;
+        print "$message\n";
+        print "$command\n";
         #sleep(1);
         system($command);
         # Always append the fully qualified file path
         append_to_data_store(File::Spec->rel2abs($file), $edit_history_file);
     }
 }
+
+sub grant_writability {
+   my $item = shift; # probably file or folder
+   print "The current user $ENV{USER} does not have write permission for $file.\n";
+   print "Do you want to open it read-only or upgrade to root (r/u)?\n";
+   print "Any other answer will quit.\n";
+   my $choice = <>;
+   chomp($choice);
+   return $choice;
+}
+
 
