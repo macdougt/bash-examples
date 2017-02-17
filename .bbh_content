@@ -30,6 +30,7 @@ function bbr_function() {
    $command_to_run
 }
 alias bbr=bbr_function
+alias big='vi $BIG_HISTORY'
 
 
 

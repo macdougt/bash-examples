@@ -75,7 +75,7 @@ else
 fi
 
 DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content')
-UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'update_installer')
+UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'update_installer' 'bbq')
 DOCKER_UTILITIES=('docb' 'docs')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
 

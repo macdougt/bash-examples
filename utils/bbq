@@ -1,0 +1,14 @@
+#!/usr/bin/env perl
+
+my $bbh = $ENV{"HOME"}."/.bash_big_history";
+my $dir = shift; 
+
+open BBH, "<$bbh" || die "Cannot open $bbh: $!";
+
+# Recreate the list
+while(<BBH>) {
+  if (/\[\d+\s+\w+\s+$dir\s+/) {
+    print;
+  }
+}
+close BBH;
