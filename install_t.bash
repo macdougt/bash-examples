@@ -74,8 +74,8 @@ else
         echo "perl installed already"
 fi
 
-DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content')
-UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'update_installer' 'bbq')
+DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content' 'update_installer')
+UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq')
 DOCKER_UTILITIES=('docb' 'docs')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
 PERL_UTILITIES=('picklist')
@@ -114,7 +114,7 @@ done
 # Grab the perl utilities
 for PERL_UTIL in "${PERL_UTILITIES[@]}"
 do
-wget https://raw.githubusercontent.com/macdougt/perl-examples/master/$PERL_UTIL -O $PERL_UTIL 
+wget https://raw.githubusercontent.com/macdougt/perl-examples/master/utils/$PERL_UTIL -O $PERL_UTIL 
 done
 
 chmod +x $JOIN_UTILITIES
