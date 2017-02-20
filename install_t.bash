@@ -78,11 +78,14 @@ DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content
 UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cd_to_file' 'list' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'update_installer' 'bbq')
 DOCKER_UTILITIES=('docb' 'docs')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
+PERL_UTILITIES=('picklist')
+
 
 JOIN_DOT_FILES=$(echo ${DOT_FILES[@]})
 JOIN_UTILITIES=$(echo ${UTILITIES[@]})
 JOIN_DOCKER_UTILITIES=$(echo ${DOCKER_UTILITIES[@]})
 JOIN_DOCKER_MACHINE_UTILITIES=$(echo ${DOCKER_MACHINE_UTILITIES[@]})
+JOIN_PERL_UTILITIES=$(echo ${PERL_UTILITIES[@]})
 
 # Grab the dot files 
 for DOT_FILE in "${DOT_FILES[@]}"
@@ -108,9 +111,16 @@ do
 wget https://raw.githubusercontent.com/macdougt/docker-machine-examples/master/$DOCKER_MACHINE_UTIL -O $DOCKER_MACHINE_UTIL 
 done
 
+# Grab the perl utilities
+for PERL_UTIL in "${PERL_UTILITIES[@]}"
+do
+wget https://raw.githubusercontent.com/macdougt/perl-examples/master/$PERL_UTIL -O $PERL_UTIL 
+done
+
 chmod +x $JOIN_UTILITIES
 chmod +x $JOIN_DOCKER_UTILITIES
 chmod +x $JOIN_DOCKER_MACHINE_UTILITIES
+chmod +x $JOIN_PERL_UTILITIES
 
 
 SUDOING_USER=$(logname)
@@ -119,6 +129,7 @@ chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOT_FILES
 chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_UTILITIES 
 chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES 
 chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
+chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_PERL_UTILITIES 
 
 
 # Move the files if necessary
@@ -133,6 +144,7 @@ mv $JOIN_DOT_FILES $HOME
 mv $JOIN_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_MACHINE_UTILITIES /usr/local/bin
+mv $JOIN_PERL_UTILITIES /usr/local/bin
 
 # Get rid of the temporary directory
 rmdir $mytmpdir

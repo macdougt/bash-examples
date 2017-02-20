@@ -4,6 +4,7 @@
 # contribute
 
 BIG_HISTORY="$HOME/.bash_big_history"
+export BBH=$BIG_HISTORY
 
 get_last() {
     #echo -n "[$$ $(whoami) $(hostname) $(pwd) $(date +'%s') \"$(date)\" $(tty)] "
