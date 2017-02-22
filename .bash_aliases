@@ -17,12 +17,13 @@ alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -alhtr'
 alias ll='ls -lhtr'
-alias s='source ~/.profile'
+alias s='source ${HOME}/.profile'
 alias u='unalias'
-alias valias='vi ~/.bash_aliases'
+alias valias='vi ${HOME}/.bash_aliases'
 alias vi='tvi'
 alias vil='vi `fc -s`'
-alias vcs='vi ~/.bashrc'
+alias vcs='vi ${HOME}/.bashrc'
+alias updatedb='sudo updatedb'
 alias webhere='python -m SimpleHTTPServer '
 
 
@@ -48,7 +49,7 @@ function find_below_function() {
 }
 alias fb=find_below_function
 
-alias eh="list ~/.edit_history"
+alias eh="list ${HOME}/.edit_history"
 
 function title {
     echo -ne "\033]0;"$*"\007"

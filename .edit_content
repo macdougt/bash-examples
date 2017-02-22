@@ -1,0 +1,8 @@
+# edit history
+
+export EH="${HOME}/.edit_history"
+
+alias eh='list $EH'
+alias seh='eh | grep $@'
+alias vi='tvi'
+alias tvil='tvi `tail -1 $EH`'

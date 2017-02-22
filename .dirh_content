@@ -1,17 +1,19 @@
 # dirhistory
 
+export DH="${HOME}/.dirhistory"
+
 function dirHistoryFunction() {
    if [ -z "$1" ]
    then
-      list ~/.dirhistory
+      list $DH
    else
-      list ~/.dirhistory | grep $*
+      list $DH | grep $*
    fi
 }
 
 alias dh=dirHistoryFunction
 alias sdh='dh | grep $@'
-alias cdl='cd `tail -2 ~/.dirhistory | head -1`'
+alias cdl='cd `tail -2 $DH | head -1`'
 
 # Override cd - change directory
 function cd() { 
@@ -28,6 +30,6 @@ function cn() { cd `cdn $1`; }
 export -f cn
 function cdd() { cd `getDir $1`; }
 export -f cdd
-function cdf() { cd `cd_to_file $1`; }
+function cdf() { >&2 echo "Moving to $1 diretory" && cd `cd_to_file $1`; }
 export -f cdf
 

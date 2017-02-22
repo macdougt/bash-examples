@@ -3,7 +3,7 @@
 # TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
 # contribute
 
-BIG_HISTORY="$HOME/.bash_big_history"
+BIG_HISTORY="${HOME}/.bash_big_history"
 export BBH=$BIG_HISTORY
 
 get_last() {
@@ -12,7 +12,41 @@ get_last() {
     fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//'
 }
 
-PROMPT_COMMAND="get_last>> $BIG_HISTORY"
+# This will run before any command is executed.
+function PreCommand() {
+  if [ -z "$AT_PROMPT" ]; then
+    return
+  fi
+  unset AT_PROMPT
+
+  RRR=$BASH_COMMAND
+  export RRR
+  echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] " >> $BIG_HISTORY
+  echo "$RRR" >> $BIG_HISTORY
+  
+
+  #echo "Running PreCommand"
+}
+trap "PreCommand" DEBUG
+
+# This will run after the execution of the previous full command line.  We don't
+# want it PostCommand to execute when first starting a bash session (i.e., at
+# the first prompt).
+FIRST_PROMPT=1
+function PostCommand() {
+  AT_PROMPT=1
+
+  if [ -n "$FIRST_PROMPT" ]; then
+    unset FIRST_PROMPT
+    return
+  fi
+
+  # Consider next command
+  >&2 grep -c "$RRR" $BIG_HISTORY
+
+  #echo "Running PostCommand"
+}
+PROMPT_COMMAND="PostCommand"
 
 # Tracking - bbh
 function bbh_function() {
