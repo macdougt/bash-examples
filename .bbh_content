@@ -21,10 +21,7 @@ function PreCommand() {
 
   RRR=$BASH_COMMAND
   export RRR
-  echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] " >> $BIG_HISTORY
-  echo "$RRR" >> $BIG_HISTORY
-  
-
+  echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)" >> $BIG_HISTORY
   #echo "Running PreCommand"
 }
 trap "PreCommand" DEBUG
@@ -34,6 +31,9 @@ trap "PreCommand" DEBUG
 # the first prompt).
 FIRST_PROMPT=1
 function PostCommand() {
+  RET_CODE=$?
+  echo " ${RET_CODE}] $RRR" >> $BIG_HISTORY
+  
   AT_PROMPT=1
 
   if [ -n "$FIRST_PROMPT" ]; then
