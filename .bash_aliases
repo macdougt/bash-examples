@@ -52,9 +52,18 @@ alias fb=find_below_function
 alias eh="list ${HOME}/.edit_history"
 
 function title {
-    echo -ne "\033]0;"$*"\007"
+   echo -ne "\033]0;"$*"\007"
 }
 
+function hline_function() {
+   for ((i=1;i<=$1;i++))
+   do
+   printf '\e(0\x71\e(B%.0s'
+   done
+   echo '' 
+}
+alias hline=hline_function
+alias sep='echo "";hline 100;echo ""'
 alias mkdir=mkcdir
 function mkcdir ()
 {
