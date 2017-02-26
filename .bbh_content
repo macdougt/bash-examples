@@ -42,6 +42,7 @@ function PostCommand() {
   fi
 
   # Consider next command
+  >&2 echo "Seen $RRR: "
   >&2 grep -c "$RRR" $BIG_HISTORY
 
   #echo "Running PostCommand"

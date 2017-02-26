@@ -39,7 +39,7 @@ alias locate_exact=locate_exact_function
 alias le=locate_exact_function
 
 function find_within_function() {
-  locate $1 | grep $1\$ | xargs grep $2 
+  locate $2 | grep $2\$ | xargs grep $1 
 }
 alias fw=find_within_function
 alias findwithin=find_within_function
@@ -55,4 +55,10 @@ function title {
     echo -ne "\033]0;"$*"\007"
 }
 
+alias mkdir=mkcdir
+function mkcdir ()
+{
+    /bin/mkdir -p -- "$1" &&
+    cd -P -- "$1"
+}
 
