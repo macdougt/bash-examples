@@ -4,7 +4,6 @@ use File::Spec;
 use File::Basename;
 
 my $command;
-my $file      = shift;
 my $locater   = 'locate';
 my $system_vi = '/usr/bin/vi';
 
@@ -16,18 +15,32 @@ if ( !-f $edit_history ) {
     &touch($edit_history);
 }
 
+# Cheap arg parse
+my $file;
+my $new;
+my $match;
+
+foreach $arg (@ARGV) {
+  if ($arg eq "-n") {
+    $new = 1;
+  } elsif ($arg eq "-m") {
+    $match = 1;
+  } else {
+    $file = $arg;
+    if ($new) {
+      # Just create it
+      &check_writability_edit( $file, $edit_history );
+      exit(0);
+    } elsif ($match) {
+      # Try to find a match in the edit history
+      &check_edit_history($file, $match);
+    }
+  } 
+}
+
 # Did the user include any input?
 if ($file !~ /\w/) {
-    # Read the edit history and present last 10
-    my $ra_list = &get_list_from_file($edit_history);
-    my $chosen_file = &getPick( $ra_list, $file );
-    if ($chosen_file == 808) {
-       print "No choice made\n";
-       exit 0;
-    }
-
-    &check_writability_edit( $chosen_file, $edit_history );
-    exit 0;
+  &check_edit_history($file);
 }
 
 
@@ -56,7 +69,7 @@ else {
             print STDERR ( $i + 1 );
             print STDERR ") $commands[$i]\n";
         }
-        my $choice = <>;
+        my $choice = <STDIN>;
         if ( $choice =~ /\d+/ ) {
             system( $commands[ $choice - 1 ] );
         }
@@ -67,10 +80,21 @@ else {
 
 sub get_list_from_file {
     my $file = shift;
+    my $match_value = shift;
+
     open(FILE, "< $file") or die "I cannot open $file\n";
-      while (<FILE>) {
-         chomp;
-         push(@content_list, $_);
+      if ($match_value =~ /\w+/) {
+        while (<FILE>) {
+          chomp;
+          if (/$match_value/) {
+	    push(@content_list, $_);
+          }
+        }
+      } else {
+        while (<FILE>) {
+          chomp;
+          push(@content_list, $_);
+        }
       }
     close FILE;
     return \@content_list;
@@ -86,15 +110,30 @@ sub touch {
 sub getPick {
     my $ra_list = shift;
     my $file = shift; # include file, may want to create it
+    my $match = shift;
+    my @new_list;
+    my $j = 0;
     if ( $#{$ra_list} > 0 ) {
         print STDERR "List:\n";
         for ( my $i = 0 ; $i <= $#{$ra_list} ; $i++ ) {
-            print STDERR ( $i + 1 );
-            print STDERR ") $$ra_list[$i]\n";
+            if ($match) {
+               if ( $$ra_list[$i] =~ /$file/) {
+                  push(@new_list, $$ra_list[$i]);
+                  print STDERR ( $j + 1 );
+                  print STDERR ") $new_list[$j]\n";
+                  $j++;
+               }
+             } else {
+               print STDERR ( $i + 1 );
+               print STDERR ") $$ra_list[$i]\n";
+             }
         }
         print STDERR "Make your choice\n";
-        my $choice = <>;
+        my $choice = <STDIN>;
         if ( $choice =~ /\d+/ ) {
+            if ($match) {
+               return $new_list[$choice - 1];
+            }
             return $$ra_list[ $choice - 1 ];
         } elsif ($choice =~ /\w+/) {
             # If the file does not exist locally then create it
@@ -103,6 +142,9 @@ sub getPick {
         }
     }
     elsif ( $#{$ra_list} == 0 ) {
+        if ($match && $$ra_list[0] !~ /$file/) {
+           return 808;
+        }
         return $$ra_list[0];
     }
     else {
@@ -201,9 +243,24 @@ sub grant_writability {
    print "The current user $ENV{USER} does not have write permission for $file.\n";
    print "Do you want to open it read-only or upgrade to root (r/u)?\n";
    print "Any other answer will quit.\n";
-   my $choice = <>;
+   my $choice = <STDIN>;
    chomp($choice);
    return $choice;
+}
+
+sub check_edit_history {
+    my $file = shift;
+    my $match = shift;
+    # Read the edit history and present last 10
+    my $ra_list = &get_list_from_file($edit_history);
+    my $chosen_file = &getPick( $ra_list, $file, $match );
+    if ($chosen_file == 808) {
+       print "No choice made\n";
+       exit 0;
+    }
+
+    &check_writability_edit( $chosen_file, $edit_history );
+    exit 0;
 }
 
 
