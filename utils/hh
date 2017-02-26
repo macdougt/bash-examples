@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+
+my $dir = shift;
+
+if ($dir !~ /\w+/) {
+   # Default to the current directory
+   use Cwd qw();
+   $dir = Cwd::abs_path();
+   print "$dir\n";
+}
+
+my $bbh = $ENV{"HOME"} . "/.bash_big_history";
+
+open (BBH, "< $bbh") || die "Sorry, I couldn't read $bbh.\\n";
+while (<BBH>) {
+  if (/^\[[^\s]+\s+[^\s]+\s+([^\s]+)/) {
+    my $cur_dir = $1;
+    if ($cur_dir eq $dir) {
+       print "$_";
+    }
+  }
+}
+close BBH;
+
+
