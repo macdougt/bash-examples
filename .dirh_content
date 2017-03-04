@@ -17,12 +17,12 @@ alias cdl='cd `tail -2 $DH | head -1`'
 
 # Override cd - change directory
 function cd() { 
-   if [ -f "$1" ]
+   if [ -f "$*" ]
    then
-      dir=$(dirname $1)
-      builtin cd "$dir" && appendif `pwd`;
+      dir=$(dirname $*)
+      builtin cd "$dir" && appendif "`pwd`";
    else
-      builtin cd "$@" && appendif `pwd`;
+      builtin cd "$*" && appendif "`pwd`";
    fi
 }
 export -f cd
