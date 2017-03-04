@@ -22,7 +22,11 @@ function cd() {
       dir=$(dirname $*)
       builtin cd "$dir" && appendif "`pwd`";
    else
-      builtin cd "$*" && appendif "`pwd`";
+      if [ -z "$*" ]; then
+        builtin cd ${HOME} && appendif "`pwd`";
+      else
+        builtin cd "$*" && appendif "`pwd`";
+      fi
    fi
 }
 export -f cd
