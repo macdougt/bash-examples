@@ -131,15 +131,6 @@ chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES
 chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
 chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_PERL_UTILITIES 
 
-
-# Move the files if necessary
-if [[ "$PWD" != "$HOME" ]]
-then
-   # TODO back up the bashrc and bash aliases files in a non-destructive way
-   mv .bashrc $HOME 
-   mv .bash_aliases $HOME
-fi
-
 mv $JOIN_DOT_FILES $HOME
 mv $JOIN_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_UTILITIES /usr/local/bin
