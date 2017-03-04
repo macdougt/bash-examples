@@ -6,6 +6,54 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+function usage()
+{
+    echo "Install utilities from github"
+    echo ""
+    echo $0 
+    echo -e "\t-h --help"
+    echo -e "\t-u=[username] or --user=[username]"
+    echo ""
+}
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    VALUE=`echo $1 | awk -F= '{print $2}'`
+    case $PARAM in
+        -h | --help)
+            usage
+            exit
+            ;;
+        -u | --user)
+            INSTALL_USER=$VALUE
+	    # check if the user exists
+            ERROR_MESSAGE=$(id -u $INSTALL_USER 2>&1)
+            if [ $? != 0 ]
+            then
+              echo $ERROR_MESSAGE
+              exit 1
+            fi
+            ;;
+        *)
+            echo "ERROR: unknown parameter \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+if [ -z "$INSTALL_USER" ]; then
+  INSTALL_USER=$(logname) # sudoing user
+fi
+
+echo "I am installing for $INSTALL_USER. Should I continue?[y/N]"
+read ANSWER
+if [ "$ANSWER" != "y" ] && [ "$ANSWER" != "Y" ]; then
+  echo "Exiting"
+  exit 0
+fi
+
 # Operate in a temporary directory
 # Check for mktemp
 if ! which mktemp
@@ -123,13 +171,12 @@ chmod +x $JOIN_DOCKER_MACHINE_UTILITIES
 chmod +x $JOIN_PERL_UTILITIES
 
 
-SUDOING_USER=$(logname)
-PRIMARY_GROUP=$(id -g -n $SUDOING_USER)
-chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOT_FILES 
-chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_UTILITIES 
-chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES 
-chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
-chown $SUDOING_USER:$PRIMARY_GROUP $JOIN_PERL_UTILITIES 
+PRIMARY_GROUP=$(id -g -n $INSTALL_USER)
+chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_DOT_FILES 
+chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_UTILITIES 
+chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES 
+chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
+chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_PERL_UTILITIES 
 
 mv $JOIN_DOT_FILES $HOME
 mv $JOIN_UTILITIES /usr/local/bin
