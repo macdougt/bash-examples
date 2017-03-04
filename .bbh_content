@@ -19,11 +19,15 @@ function PreCommand() {
   fi
   unset AT_PROMPT
 
-  RRR=$BASH_COMMAND
-  export RRR
-  echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)" >> $BIG_HISTORY
-  #echo "Running PreCommand"
+  CURRENT_COMMAND=$BASH_COMMAND
+  export CURRENT_COMMAND
+  
+  # Do not process PostCommand
+  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then 
+    echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)" >> $BIG_HISTORY
+  fi
 }
+
 trap "PreCommand" DEBUG
 
 # This will run after the execution of the previous full command line.  We don't
@@ -32,23 +36,25 @@ trap "PreCommand" DEBUG
 FIRST_PROMPT=1
 function PostCommand() {
   RET_CODE=$?
-  echo " ${RET_CODE}] $RRR" >> $BIG_HISTORY
+
+  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
+    echo " ${RET_CODE}] $CURRENT_COMMAND" >> $BIG_HISTORY
   
-  AT_PROMPT=1
+    AT_PROMPT=1
 
-  if [ -n "$FIRST_PROMPT" ]; then
-    unset FIRST_PROMPT
-    return
+    if [ -n "$FIRST_PROMPT" ]; then
+      unset FIRST_PROMPT
+      return
+    fi
+
+    # Consider next command
+    >&2 printf '\e[38;2;90;90;90m'
+    >&2 echo -n "Seen $CURRENT_COMMAND: "
+    >&2 grep -c "$CURRENT_COMMAND" $BIG_HISTORY
+    >&2 printf '\e[0m'
   fi
-
-  # Consider next command
-  >&2 printf '\e[38;2;90;90;90m'
-  >&2 echo -n "Seen $RRR: "
-  >&2 grep -c "$RRR" $BIG_HISTORY
-  >&2 printf '\e[0m'
-
-  #echo "Running PostCommand"
 }
+
 PROMPT_COMMAND="PostCommand"
 
 # Tracking - bbh
