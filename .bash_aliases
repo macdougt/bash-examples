@@ -17,6 +17,7 @@ alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -alhtr'
 alias ll='ls -lhtr'
+alias pl='picklist'
 alias s='source ${HOME}/.profile'
 alias u='unalias'
 alias valias='vi ${HOME}/.bash_aliases'
@@ -68,6 +69,6 @@ alias mkdir=mkcdir
 function mkcdir ()
 {
     /bin/mkdir -p -- "$1" &&
-    cd -P -- "$1"
+    cd "$1"
 }
 
