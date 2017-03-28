@@ -6,12 +6,6 @@
 BIG_HISTORY="${HOME}/.bash_big_history"
 export BBH=$BIG_HISTORY
 
-get_last() {
-    #echo -n "[$$ $(whoami) $(hostname) $(pwd) $(date +'%s') \"$(date)\" $(tty)] "
-    echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] "
-    fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//'
-}
-
 # This will run before any command is executed.
 function PreCommand() {
   if [ -z "$AT_PROMPT" ]; then
@@ -21,10 +15,14 @@ function PreCommand() {
 
   CURRENT_COMMAND=$BASH_COMMAND
   export CURRENT_COMMAND
+    
   
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then 
-    echo -n "[$$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)" >> $BIG_HISTORY
+    # pid, user, pwd, epoch, date readable, tty
+    echo "" >> $BIG_HISTORY
+    echo -n "[pre $$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] $CURRENT_COMMAND" >> $BIG_HISTORY
+    #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
   fi
 }
 
@@ -36,9 +34,9 @@ trap "PreCommand" DEBUG
 FIRST_PROMPT=1
 function PostCommand() {
   RET_CODE=$?
-
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
-    echo " ${RET_CODE}] $CURRENT_COMMAND" >> $BIG_HISTORY
+    echo "" >> $BIG_HISTORY
+    echo "[post $CURRENT_COMMAND $$ $(date +'%s') $(tty) ${RET_CODE}]" >> $BIG_HISTORY
   
     AT_PROMPT=1
 
