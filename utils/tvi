@@ -128,7 +128,7 @@ sub getPick {
                print STDERR ") $$ra_list[$i]\n";
              }
         }
-        print STDERR "Make your choice\n";
+        print STDERR "Make your choice, press enter to create $file here\n";
         my $choice = <STDIN>;
         if ( $choice =~ /\d+/ ) {
             if ($match) {
@@ -139,7 +139,9 @@ sub getPick {
             # If the file does not exist locally then create it
             # otherwise open the current directory version
             return $choice;
-        }
+        } else {
+            return $file;
+	}
     }
     elsif ( $#{$ra_list} == 0 ) {
         if ($match && $$ra_list[0] !~ /$file/) {
