@@ -15,10 +15,10 @@ function PreCommand() {
 
   CURRENT_COMMAND=$BASH_COMMAND
   export CURRENT_COMMAND
-    
-  
+  #echo "--$CURRENT_COMMAND--"
+
   # Do not process PostCommand
-  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then 
+  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     # pid, user, pwd, epoch, date readable, tty
     echo "" >> $BIG_HISTORY
     echo -n "[pre $$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] $CURRENT_COMMAND" >> $BIG_HISTORY
@@ -34,11 +34,10 @@ trap "PreCommand" DEBUG
 FIRST_PROMPT=1
 function PostCommand() {
   RET_CODE=$?
+  #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     echo "" >> $BIG_HISTORY
     echo "[post $CURRENT_COMMAND $$ $(date +'%s') $(tty) ${RET_CODE}]" >> $BIG_HISTORY
-  
-    AT_PROMPT=1
 
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
@@ -48,9 +47,10 @@ function PostCommand() {
     # Consider next command
     >&2 printf '\e[38;2;90;90;90m'
     >&2 echo -n "Seen $CURRENT_COMMAND: "
-    >&2 grep -c "$CURRENT_COMMAND" $BIG_HISTORY
+    >&2 grep -c "pre.*$CURRENT_COMMAND" $BIG_HISTORY
     >&2 printf '\e[0m'
   fi
+  AT_PROMPT=1
 }
 
 PROMPT_COMMAND="PostCommand"
@@ -73,8 +73,4 @@ function bbr_function() {
 }
 alias bbr=bbr_function
 alias big='vi $BIG_HISTORY'
-
-
-
-
 
