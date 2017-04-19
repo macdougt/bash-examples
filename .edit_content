@@ -2,7 +2,17 @@
 
 export EH="${HOME}/.edit_history"
 
-alias eh='list $EH'
+function editHistoryFunction() {
+   if [ -z "$1" ]
+   then
+      list $EH
+   else
+      list $EH | grep $*
+   fi
+}
+
+
+alias eh=editHistoryFunction
 alias seh='eh | grep $@'
 alias vi='tvi'
 alias tvil='tvi `tail -1 $EH`'
