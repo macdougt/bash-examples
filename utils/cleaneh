@@ -1,0 +1,71 @@
+#!/usr/bin/env perl
+
+my $option = shift;
+my $forceOption=0;
+
+if ($option eq "-f" || $option eq "-force") {
+	$forceOption=1;
+} 
+
+my $editHistoryFile = $ENV{"HOME"}."/.edit_history";
+
+# Create the edit history file if it does not exist
+if (! -e $editHistoryFile) {
+	open DH, ">$editHistoryFile" || die;
+	close DH;
+}
+
+# Store the files
+my @files;
+
+# Read the contents of the edit history file
+open DH2, "<$editHistoryFile" || die "Cannot open $editHistoryFile: $!";
+
+# Recreate the list
+
+print "Removing...\n";
+my $removeCount=0;
+while(my $file = <DH2>) {
+	chomp($file);
+	if (-f $file) {
+		push(@files, $file);		
+	} else {
+		print "\t$file\n";
+		$removeCount++;
+	}
+}
+close DH2;
+
+if ($removeCount == 0) {
+	print " No files to remove.\n";
+	exit;
+}
+
+print "Removing $removeCount files\n";
+
+if (! $forceOption) {
+	print "Go ahead with removal?[y/N]\n";
+	my $consent= <STDIN>;
+	chomp $consent;
+	if ($consent ne "Y" && $consent ne "y") {
+		# Exit with no action performed
+		print "Did not remove the files.\n";
+		exit;  
+	}
+}
+
+# Add the current file to the end of the list
+push(@files, $fileToBeAdded);
+
+# Overwrite the edit history file with the updated list
+open DH3, ">$editHistoryFile" or die "Could not open file '$editHistoryFile' $!";
+my $i = 0;
+while ($i<$#files) {
+    print DH3 "$files[$i]\n";
+    $i++;
+}
+# Add the last file with no newline
+print DH3 "$files[$#files]";
+
+close DH3;
+
