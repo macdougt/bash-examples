@@ -160,6 +160,11 @@ sub append_to_data_store {
     my $data_to_be_added = shift;
     my $data_file = shift;
 
+    # There must be something to add
+    if ($data_to_be_added !~ /[\w\d]/) {
+       return;
+    }  
+
     # Store the data
     my @data;
 
