@@ -17,6 +17,16 @@ my $cdInput = shift;
 # The file that stores the directory history
 my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
 
+# First check if this is a regular directory
+if (-d $cdInput) {
+   print $cdInput;
+   exit(0);
+} elsif (-f $cdInput) {
+   use File::Basename;
+   print dirname($cdInput); 
+   exit(0);
+}
+
 # This case assumes that the user is looking to match a directory
 # or wants the nth directory in the directory history
 # Both open and iterate through the history file
