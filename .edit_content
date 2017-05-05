@@ -5,9 +5,9 @@ export EH="${HOME}/.edit_history"
 function editHistoryFunction() {
    if [ -z "$1" ]
    then
-      list $EH
+      cat $EH
    else
-      list $EH | grep $*
+      cat $EH | grep $*
    fi
 }
 
