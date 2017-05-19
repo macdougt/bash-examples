@@ -8,13 +8,12 @@ alias g='grep'
 
 # Not for MAC
 if [ "$(uname)" == "Darwin" ]; then
-   alias ls='ls -CF'
+  alias filepath='greadlink -f' 
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-   alias ls='ls -F --color=never --show-control-chars'
+  alias ls='ls --color=never --show-control-chars'
 fi
 
 
-alias filepath='greadlink -f' 
 alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -alhtr'
@@ -48,22 +47,22 @@ alias fw=find_within_function
 alias findwithin=find_within_function
 
 function find_below_function() {
-   find . -name "$1"
+  find . -name "$1"
 }
 alias fb=find_below_function
 
 alias eh="list ${HOME}/.edit_history"
 
 function title {
-   echo -ne "\033]0;"$*"\007"
+  echo -ne "\033]0;"$*"\007"
 }
 
 function hline_function() {
-   for ((i=1;i<=$1;i++))
-   do
-   printf '\e(0\x71\e(B%.0s'
-   done
-   echo '' 
+  for ((i=1;i<=$1;i++))
+  do
+  printf '\e(0\x71\e(B%.0s'
+  done
+  echo '' 
 }
 alias hline=hline_function
 alias sep='echo "";hline 100;echo ""'
