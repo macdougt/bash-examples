@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 # Must have one argument
+use File::Basename;
 
 my $file_to_copy = shift;
 
@@ -7,11 +8,19 @@ if ($file_to_copy !~ /\w/) {
    die "You need to specify a file to back up\n";
 }
 
+# Is there a directory
+my $dir = dirname($file_to_copy);
+if ($dir ne "") {
+  $file_to_copy = basename($file_to_copy);
+} else {
+  $dir = ".";
+}
+
 # Dissect the file a bit
 # Grab the first letter
 my $first_letter = substr($file_to_copy, 0, 1);
 
-opendir(DH,".");
+opendir(DH,$dir);
 my @files = readdir(DH);
 closedir(DH);
 
@@ -33,6 +42,7 @@ foreach my $file (@files)
        }
     }
 }
+
 my $new_val = $max_rev + 1;
-copy($file_to_copy,"$first_letter$new_val\_$file_to_copy") or die "Copy failed: $!";
+copy("$dir/$file_to_copy","$dir/$first_letter$new_val\_$file_to_copy") or die "Copy failed: $!";
 
