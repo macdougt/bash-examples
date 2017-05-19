@@ -13,6 +13,8 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
    alias ls='ls -F --color=never --show-control-chars'
 fi
 
+
+alias filepath='greadlink -f' 
 alias l='ls -CF'
 alias la='ls -A'
 alias lal='ls -alhtr'
