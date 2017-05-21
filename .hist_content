@@ -1,8 +1,10 @@
 # history
 function history_function() {
-   if [ $# -eq 0 ]
-     then
+   re='^[0-9]+$'
+   if [ $# -eq 0 ]; then
      builtin history | history_unique ;
+   elif [[ $1 =~ $re ]]; then
+     builtin history $1    
    else
      builtin history | grep $* | history_unique ;
    fi   
