@@ -5,9 +5,9 @@ export DH="${HOME}/.dirhistory"
 function dirHistoryFunction() {
    if [ -z "$1" ]
    then
-      list $DH
+      dh_list $DH
    else
-      list $DH | grep $*
+      dh_list $DH | grep $*
    fi
 }
 

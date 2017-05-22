@@ -1,0 +1,36 @@
+#!/usr/bin/env perl
+
+my $file = shift;
+my $tag_file = shift;
+
+# Grab the tags
+use Term::ANSIColor qw(:constants); # colors for tags
+my %tags;
+
+if ($tag_file =~ /\w/ && -f $tag_file) {
+  open (TAG_FILE, "< $tag_file") || die "Sorry, I couldn't read $tag_file.\\n";
+  while (<TAG_FILE>) {
+    if (/([^\/]+)\s+([\w\/]+)/) {
+      $tags{$2}=$1;
+    }
+  }
+  close TAG_FILE;
+}
+
+open FILE_WITH_LIST, "<$file" || die "Cannot open $file: $!";
+
+# Print the list with index
+my $count = 1;
+while(my $item = <FILE_WITH_LIST>) {
+  chomp($item);
+  print "$count) $item";
+  # Perf hit if no tags exist but I don't believe
+  # speed is a problem at this point, fix if necessary
+  if (exists($tags{$item})) {
+    print BLUE, " <<".$tags{$item}.">>", RESET;
+  }
+  print "\n";
+  $count++;
+}
+close FILE_WITH_LIST;
+
