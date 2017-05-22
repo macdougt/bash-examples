@@ -1,13 +1,14 @@
 # dirhistory
 
 export DH="${HOME}/.dirhistory"
+export DH_TAGS="${HOME}/.dh_tags"
 
 function dirHistoryFunction() {
    if [ -z "$1" ]
    then
-      dh_list $DH
+      dh_list $DH $DH_TAGS
    else
-      dh_list $DH | grep $*
+      dh_list $DH $DH_TAGS | grep $*
    fi
 }
 
