@@ -5,7 +5,10 @@ unset file
 
 case "$TERM" in
 xterm*|rxvt*)
-    PS1="\e[0;34m[\u@\h \W]\$ \e[m"
+  BLUE="\[$(tput setaf 4)\]"
+  RESET="\[$(tput sgr0)\]"
+  export PS1="${BLUE}[\u@\h \W]\$ ${RESET}"
+#    PS1="\e[0;34m[\u@\h \W]\$ \e[m"
 #    PS1="\033[34m\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1\\033[39m"
     ;;
 *)
