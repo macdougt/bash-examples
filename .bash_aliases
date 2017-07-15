@@ -73,3 +73,8 @@ function mkcdir ()
     cd "$1"
 }
 
+alias tgz=tgz_function
+function tgz_function() {
+  tar cvfz $1.tgz $1
+}
+
