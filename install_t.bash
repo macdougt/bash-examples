@@ -124,10 +124,10 @@ fi
 
 DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content' '.edit_content' 'update_installer')
 UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq' 'hh')
+MAC_UTILITIES=('new')
 DOCKER_UTILITIES=('docb' 'docs')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
 PERL_UTILITIES=('picklist')
-
 
 JOIN_DOT_FILES=$(echo ${DOT_FILES[@]})
 JOIN_UTILITIES=$(echo ${UTILITIES[@]})
@@ -183,6 +183,22 @@ mv $JOIN_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_MACHINE_UTILITIES /usr/local/bin
 mv $JOIN_PERL_UTILITIES /usr/local/bin
+
+
+if [ "$ARCH" == "mac" ]
+  then
+    # Grab the MAC utilities
+    for MAC_UTIL in "${MAC_UTILITIES[@]}"
+    do
+    wget https://raw.githubusercontent.com/macdougt/bash-examples/master/utils/$MAC_UTIL -O $MAC_UTIL 
+    done
+
+    JOIN_MAC_UTILITIES=$(echo ${MAC_UTILITIES[@]})
+    chmod +x $JOIN_UTILITIES
+    chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_UTILITIES
+    mv $JOIN_UTILITIES /usr/local/bin
+fi
+
 
 # Get rid of the temporary directory
 rmdir $mytmpdir

@@ -1,0 +1,9 @@
+# These are MAC specific additions
+
+# Add bash completions
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+. $(brew --prefix)/etc/bash_completion
+fi
+
+
+

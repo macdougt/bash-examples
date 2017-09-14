@@ -3,6 +3,11 @@ for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_co
 done
 unset file
 
+# Add MAC specific content
+if [ "$(uname)" == "Darwin" ]; then
+  source .mac_content
+fi
+
 case "$TERM" in
 xterm*|rxvt*)
   BLUE="\[$(tput setaf 4)\]"
@@ -24,9 +29,16 @@ shopt -s histappend
 # Autocorrect typos in path names when using `cd`
 shopt -s cdspell
 
-# Add bash completions
-if [ "$(uname)" == "Darwin" ]; then
-  if [ -f $(brew --prefix)/etc/bash_completion ]; then
-    . $(brew --prefix)/etc/bash_completion
+# Powerline; check if powerline is used
+function _update_ps1() {
+  PS1="$(powerline-shell $?)"
+}
+
+if command -v powerline-shell > /dev/null 2>&1; then
+  if [ "$TERM" != "linux" ]; then
+    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
   fi
+else
+  echo "powerline-shell not found"
 fi
+
