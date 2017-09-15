@@ -57,6 +57,10 @@ function title {
   echo -ne "\033]0;"$*"\007"
 }
 
+function it2prof {
+  echo -e "\033]50;SetProfile=$1\a"
+}
+
 function hline_function() {
   for ((i=1;i<=$1;i++))
   do
