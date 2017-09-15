@@ -20,6 +20,29 @@ function dockerKillFunction() {
 
 alias dockerkill=dockerKillFunction
 
+# List docker images matching regexp
+function diFunction() {
+  docker image ls | egrep "$1"
+}
+
+alias di=diFunction
+
+function dirmFunction() {
+  di $1
+  # Prompt user for input
+  echo -n "Kill the above images [y/N]? "
+  read answer
+  echo
+
+  if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+    echo "Performing kills now..."
+    docker image ls | egrep "$1" | awk '{print $3}' | xargs docker rmi
+  else
+    echo "Just looking then"
+  fi
+}
+
+alias dirm=dirmFunction
 
 # Aliases
 
