@@ -194,9 +194,9 @@ if [ "$ARCH" == "mac" ]
     done
 
     JOIN_MAC_UTILITIES=$(echo ${MAC_UTILITIES[@]})
-    chmod +x $JOIN_UTILITIES
-    chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_UTILITIES
-    mv $JOIN_UTILITIES /usr/local/bin
+    chmod +x $JOIN_MAC_UTILITIES
+    chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_MAC_UTILITIES
+    mv $JOIN_MAC_UTILITIES /usr/local/bin
 fi
 
 
