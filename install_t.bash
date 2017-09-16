@@ -122,7 +122,7 @@ else
         echo "perl installed already"
 fi
 
-DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content' '.edit_content' 'update_installer')
+DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content' '.edit_content' '.mac_content' 'update_installer')
 UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq' 'hh')
 MAC_UTILITIES=('new')
 DOCKER_UTILITIES=('docb' 'docs')
