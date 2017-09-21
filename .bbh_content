@@ -37,8 +37,9 @@ function PostCommand() {
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     echo "" >> $BIG_HISTORY
+    FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
     echo "[post $CURRENT_COMMAND $$ $(date +'%s') $(tty) ${RET_CODE}]" >> $BIG_HISTORY
-
+    echo "[full $FULL_COMMAND $$ $(date +'%s') $(tty)]" >> $BIG_HISTORY
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
       return
