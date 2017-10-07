@@ -8,11 +8,12 @@ my %unique_lines;
 # The following line allows piped input
 # Each line of input will be pushed to the hash 
 # Sample line for bbh ouput
-#    1480) [25386 vagrant 1446390647 "Sun Nov  1 15:10:47 UTC 2015"] history
+#    1480) [full docker run -it -p 8888:8888 gcr.io/tensorflow/tensorflow 1861 1507385410 /dev/ttys000]
 #
-
+# TODO grab the last line and show the command, it may not be complete 
+#
 while (<>) {
-   if (/^\s*(\d+)\)\s+[^\]]+\]\s*(.*)/) {
+   if (/^\s*(\d+)\)\s+\[full\s+(.*?) \d+ \d+ [\/\w]+\]/) {
       $unique_lines{$2} = $1; 
    }
 }

@@ -58,12 +58,37 @@ PROMPT_COMMAND="PostCommand"
 
 # Tracking - bbh
 function bbh_function() {
-   if [ $# -eq 0 ]
-     then
-     list $BIG_HISTORY | bbh_unique ;
-   else
-     list $BIG_HISTORY | grep $* | bbh_unique ;
-   fi
+  ALL=false
+  while [[ "$#" -gt "0" ]]
+  do
+    key="$1"
+
+    case $key in
+      -a|--all)
+      #UNIQUE_CLAUSE='| perl -lne '"'"'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}'"'"''
+      echo "Showing all..."
+      ALL=true
+      shift # past argument
+      ;;
+      *)
+      break
+      ;;
+    esac
+  done
+
+  if [ "$#" -eq "0" ] ; then
+    if [ "$ALL" = true ]; then 
+      list $BIG_HISTORY | perl -lne 'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}';
+    else
+      list $BIG_HISTORY | bbh_unique;
+    fi
+  else
+    if [ "$ALL" = true ]; then
+      list $BIG_HISTORY | egrep $* | perl -lne 'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}';
+    else
+      list $BIG_HISTORY | egrep $* | bbh_unique;
+    fi     
+  fi
 }
 alias bbh=bbh_function
 
