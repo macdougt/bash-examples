@@ -48,7 +48,7 @@ if [ -z "$INSTALL_USER" ]; then
 fi
 
 # Set the home directory of the INSTALL_USER
-HOME_DIR=$( getent passwd "$USER" | cut -d: -f6 )
+HOME_DIR=$( getent passwd "$INSTALL_USER" | cut -d: -f6 )
 
 
 echo "I am installing for $INSTALL_USER. Should I continue?[y/N]"
