@@ -47,6 +47,10 @@ if [ -z "$INSTALL_USER" ]; then
   INSTALL_USER=$(logname) # sudoing user
 fi
 
+# Set the home directory of the INSTALL_USER
+HOME_DIR=$( getent passwd "$USER" | cut -d: -f6 )
+
+
 echo "I am installing for $INSTALL_USER. Should I continue?[y/N]"
 read ANSWER
 if [ "$ANSWER" != "y" ] && [ "$ANSWER" != "Y" ]; then
@@ -75,14 +79,14 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
    ARCH='linux'
    echo "This terminal appears to be running a linux os"
    # Check if the vimrc has compatibility mode set
-   if grep "set nocompatible" $HOME/.vimrc
+   if grep "set nocompatible" $HOME_DIR/.vimrc
       then
 	echo "Non-compatibility mode is set"
       else
 	echo "Adding non-compatibility mode to vi"
-	echo "set nocompatible" >> $HOME/.vimrc
+	echo "set nocompatible" >> $HOME_DIR/.vimrc
 	echo "Adding local history to vi"
-	echo "autocmd BufWritePost * execute '! if [ -d RCS ]; then ci -u -m\"%\" % ; co -l %; fi'" >> $HOME/.vimrc
+	echo "autocmd BufWritePost * execute '! if [ -d RCS ]; then ci -u -m\"%\" % ; co -l %; fi'" >> $HOME_DIR/.vimrc
       fi
 fi
 
@@ -178,7 +182,7 @@ chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_DOCKER_UTILITIES
 chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_DOCKER_MACHINE_UTILITIES 
 chown $INSTALL_USER:$PRIMARY_GROUP $JOIN_PERL_UTILITIES 
 
-mv $JOIN_DOT_FILES $HOME
+mv $JOIN_DOT_FILES $HOME_DIR
 mv $JOIN_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_UTILITIES /usr/local/bin
 mv $JOIN_DOCKER_MACHINE_UTILITIES /usr/local/bin
