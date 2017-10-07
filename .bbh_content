@@ -76,14 +76,16 @@ function bbh_function() {
     esac
   done
 
+  
+
   if [ "$#" -eq "0" ] ; then
-    if [ "$ALL" = true ]; then 
+    if [ "$ALL" = "true" ]; then 
       list $BIG_HISTORY | perl -lne 'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}';
     else
       list $BIG_HISTORY | bbh_unique;
     fi
   else
-    if [ "$ALL" = true ]; then
+    if [ "$ALL" = "true" ]; then
       list $BIG_HISTORY | egrep $* | perl -lne 'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}';
     else
       list $BIG_HISTORY | egrep $* | bbh_unique;
