@@ -6,6 +6,8 @@
 BIG_HISTORY="${HOME}/.bash_big_history"
 export BBH=$BIG_HISTORY
 
+export BBH_JSON="${HOME}/bbh.json"
+
 # This will run before any command is executed.
 function PreCommand() {
   if [ -z "$AT_PROMPT" ]; then
@@ -22,6 +24,8 @@ function PreCommand() {
     # pid, user, pwd, epoch, date readable, tty
     echo "" >> $BIG_HISTORY
     echo -n "[pre $$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] $CURRENT_COMMAND" >> $BIG_HISTORY
+    echo "{\"type\":\"pre\",\"user\":\"$(whoami)\",\"pwd\":\"$(pwd)\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+
     #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
   fi
 }
@@ -39,7 +43,9 @@ function PostCommand() {
     echo "" >> $BIG_HISTORY
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
     echo "[post $CURRENT_COMMAND $$ $(date +'%s') $(tty) ${RET_CODE}]" >> $BIG_HISTORY
+    echo "{\"type\":\"post\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
     echo "[full $FULL_COMMAND $$ $(date +'%s') $(tty)]" >> $BIG_HISTORY
+    echo "{\"type\":\"full\",\"command\":\"$FULL_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\"}" >> $BBH_JSON
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
       return
