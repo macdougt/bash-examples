@@ -21,10 +21,16 @@ function PreCommand() {
 
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
-    # pid, user, pwd, epoch, date readable, tty
-    echo "" >> $BIG_HISTORY
-    echo -n "[pre $$ $(whoami) $(pwd) $(date +'%s') \"$(date)\" $(tty)] $CURRENT_COMMAND" >> $BIG_HISTORY
-    echo "{\"type\":\"pre\",\"user\":\"$(whoami)\",\"pwd\":\"$(pwd)\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+    # pid, user, pwd, epoch, date readable, tty, hostname
+    cur_pid=$$
+    user=$(whoami)
+    dir=$(pwd)
+    epoch=$(date +'%s')
+    date_nice=$(date)
+    tty=$(tty)
+    cur_host=$(hostname)
+    echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
+    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
 
     #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
   fi
@@ -38,14 +44,20 @@ trap "PreCommand" DEBUG
 FIRST_PROMPT=1
 function PostCommand() {
   RET_CODE=$?
+  cur_pid=$$
+  user=$(whoami)
+  dir=$(pwd)
+  epoch=$(date +'%s')
+  tty=$(tty)
+  cur_host=$(hostname)
+
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
-    echo "" >> $BIG_HISTORY
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
-    echo "[post $CURRENT_COMMAND $$ $(date +'%s') $(tty) ${RET_CODE}]" >> $BIG_HISTORY
-    echo "{\"type\":\"post\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
-    echo "[full $FULL_COMMAND $$ $(date +'%s') $(tty)]" >> $BIG_HISTORY
-    echo "{\"type\":\"full\",\"command\":\"$FULL_COMMAND\",\"pid\":\"$$\",\"epoch\":\"$(date +'%s')\",\"tty\":\"$(tty)\"}" >> $BBH_JSON
+    echo "[post $CURRENT_COMMAND $cur_pid $dir $epoch $tty $cur_host ${RET_CODE}]" >> $BIG_HISTORY
+    echo "{\"type\":\"post\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"cur_$pid\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+    echo "[full $FULL_COMMAND $user $cur_pid $epoch $(tty)]" >> $BIG_HISTORY
+    echo "{\"type\":\"full\",\"command\":\"$FULL_COMMAND\",\"user\":\"$user\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
       return
