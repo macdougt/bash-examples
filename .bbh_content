@@ -54,10 +54,11 @@ function PostCommand() {
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
+    ESC_FULL_COMMAND=${FULL_COMMAND//\"/\\\"}
     echo "[post $CURRENT_COMMAND $cur_pid $dir $epoch $tty $cur_host ${RET_CODE}]" >> $BIG_HISTORY
     echo "{\"type\":\"post\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
     echo "[full $FULL_COMMAND $user $cur_pid $epoch $(tty)]" >> $BIG_HISTORY
-    echo "{\"type\":\"full\",\"command\":\"$FULL_COMMAND\",\"user\":\"$user\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
+    echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"user\":\"$user\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
       return
