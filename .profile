@@ -5,7 +5,7 @@ unset file
 
 # Add MAC specific content
 if [ "$(uname)" == "Darwin" ]; then
-  source .mac_content
+  source ${HOME}/.mac_content
 fi
 
 case "$TERM" in
