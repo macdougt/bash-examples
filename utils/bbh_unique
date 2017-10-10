@@ -13,7 +13,7 @@ my %unique_lines;
 # TODO grab the last line and show the command, it may not be complete 
 #
 while (<>) {
-   if (/^\s*(\d+)\)\s+\[full\s+(.*?) \d+ \d+ [\/\w]+\]/) {
+   if (/^\s*(\d+)\)\s+\[full\s+(.*?) [\w-_]+ \d+ \d+ [\/\w]+\]/) {
       $unique_lines{$2} = $1; 
    }
 }
