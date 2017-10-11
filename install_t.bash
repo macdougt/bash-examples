@@ -47,8 +47,6 @@ if [ -z "$INSTALL_USER" ]; then
   INSTALL_USER=$(logname) # sudoing user
 fi
 
-# Set the home directory of the INSTALL_USER
-HOME_DIR=$( getent passwd "$INSTALL_USER" | cut -d: -f6 )
 
 
 echo "I am installing for $INSTALL_USER. Should I continue?[y/N]"
@@ -75,9 +73,18 @@ cd $mytmpdir
 if [ "$(uname)" == "Darwin" ]; then
    ARCH='mac'
    echo "This terminal appears to be running MAC os"
+
+   # Set the home directory of the INSTALL_USER
+   HOME_DIR=$(dscacheutil -q user -a name $INSTALL_USER | grep dir | cut -d':' -f2)
+
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
    ARCH='linux'
    echo "This terminal appears to be running a linux os"
+
+
+   # Set the home directory of the INSTALL_USER
+   HOME_DIR=$( getent passwd "$INSTALL_USER" | cut -d: -f6 )
+
    # Check if the vimrc has compatibility mode set
    if grep "set nocompatible" $HOME_DIR/.vimrc
       then
