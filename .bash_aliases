@@ -86,6 +86,7 @@ function tgz_function() {
 
 alias range=range_function
 function range_function() {
- tail +$1 $3 | head -$2 
+  let offset=1+$2-$1
+  tail +$1 $3 | head -$offset 
 }
 
