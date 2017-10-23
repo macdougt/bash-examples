@@ -5,6 +5,7 @@
 alias a='alias'
 alias c='clear'
 alias g='grep'
+alias eg='egrep'
 
 # Not for MAC
 if [ "$(uname)" == "Darwin" ]; then
@@ -81,5 +82,10 @@ function mkcdir ()
 alias tgz=tgz_function
 function tgz_function() {
   tar cvfz $1.tgz $1
+}
+
+alias range=range_function
+function range_function() {
+ tail +$1 $3 | head -$2 
 }
 
