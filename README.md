@@ -6,8 +6,7 @@ This repository includes bash content
 bbh
 ---
 
-Format:
--------
+### Format:
 
 ```[pre pid user cwd epoch_timestamp "readable date with timezone" tty hostname] command1
 [post command1 pid cwd epoch_timestamp tty hostname return_code]
