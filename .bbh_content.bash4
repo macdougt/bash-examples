@@ -1,0 +1,137 @@
+# Not ideal but it will append the last command to a common history file
+# this will leave the last commands in each terminal unadded
+# TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
+# contribute
+
+BIG_HISTORY="${HOME}/.bash_big_history"
+export BBH=$BIG_HISTORY
+export BBH_JSON="${HOME}/bbh.json"
+
+# Global map of tty to unique _id (id_+=timestamp at key creation)
+declare -A COMMAND_MAP
+#LAST_PROCESSED_ID=""
+
+# This will run before any command is executed.
+function PreCommand() {
+  if [ -z "$AT_PROMPT" ]; then
+    return
+  fi
+  unset AT_PROMPT
+
+  CURRENT_COMMAND=$BASH_COMMAND
+  export CURRENT_COMMAND
+  #echo "--$CURRENT_COMMAND--"
+
+  # Do not process PostCommand
+  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
+    # pid, user, pwd, epoch, date readable, tty, hostname
+
+    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\"/\\\"}
+
+    cur_pid=$$
+    user=$(whoami)
+    dir=$(pwd)
+    epoch=$(date +'%s')
+    date_nice=$(date)
+    tty=$(tty)
+    cur_host=$(hostname)
+    echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
+    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
+    # Add entry to map
+    current_id="id_$epoch"
+    COMMAND_MAP[$tty]=$current_id
+    #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
+  fi
+}
+
+trap "PreCommand" DEBUG
+
+# This will run after the execution of the previous full command line.  We don't
+# want it PostCommand to execute when first starting a bash session (i.e., at
+# the first prompt).
+FIRST_PROMPT=1
+function PostCommand() {
+  RET_CODE=$?
+  #echo "RRRR ${RET_CODE}"
+  cur_pid=$$
+  user=$(whoami)
+  dir=$(pwd)
+  epoch=$(date +'%s')
+  tty=$(tty)
+  cur_host=$(hostname)
+
+  #echo "-+$CURRENT_COMMAND+-"
+  if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
+    FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
+    ESC_FULL_COMMAND=${FULL_COMMAND//\"/\\\"}
+    CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
+    echo "[post $CURRENT_COMMAND $dir $epoch $tty $CURRENT_PROCESSING_ID ${RET_CODE}]" >> $BIG_HISTORY
+    echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"id\":\"$CURRENT_PROCESSING_ID\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+    echo "[full $FULL_COMMAND $CURRENT_PROCESSING_ID]" >> $BIG_HISTORY
+    echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\"}" >> $BBH_JSON
+    # Remove the tty key and replace the last processed, what happens in the first run
+    unset COMMAND_MAP[$tty]
+    #LAST_PROCESSED_ID=$CURRENT_PROCESSING_ID
+
+    if [ -n "$FIRST_PROMPT" ]; then
+      unset FIRST_PROMPT
+      return
+    fi
+
+    # Consider next command
+    >&2 printf '\e[38;2;90;90;90m'
+    >&2 echo -n "Seen $CURRENT_COMMAND: "
+    >&2 grep -c "pre.*$CURRENT_COMMAND" $BIG_HISTORY
+    >&2 printf '\e[0m'
+  fi
+  AT_PROMPT=1
+}
+
+PROMPT_COMMAND="PostCommand"
+
+# Tracking - bbh
+function bbh_function() {
+  ALL=false
+  while [[ "$#" -gt "0" ]]
+  do
+    key="$1"
+
+    case $key in
+      -a|--all)
+      #UNIQUE_CLAUSE='| perl -lne '"'"'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}'"'"''
+      echo "Showing all..."
+      ALL=true
+      shift # past argument
+      ;;
+      *)
+      break
+      ;;
+    esac
+  done
+
+  
+
+  if [ "$#" -eq "0" ] ; then
+    if [ "$ALL" = "true" ]; then 
+      list $BIG_HISTORY | perl -lne 'if(/\[full(.*) [\w-_]+ \d+ \d+ [\w\/]+\]/){print $1}';
+    else
+      list $BIG_HISTORY | bbh_unique;
+    fi
+  else
+    if [ "$ALL" = "true" ]; then
+      list $BIG_HISTORY | egrep $* | perl -lne 'if(/\[full(.*) [\w-_]+ \d+ \d+ [\w\/]+\]/){print $1}';
+    else
+      list $BIG_HISTORY | egrep $* | bbh_unique;
+    fi     
+  fi
+}
+alias bbh=bbh_function
+
+function bbr_function() {
+   command_to_run=$(bbh_function | grep ^"$1 " | cut -d' ' -f2-)
+   echo "$command_to_run"
+   $command_to_run
+}
+alias bbr=bbr_function
+alias big='vi $BIG_HISTORY'
+alias bbh_here='perl -e '"'"'$d=`pwd`;chomp($d);while(<>){if (/$d\s/){print $_}}'"'"' $BBH'
