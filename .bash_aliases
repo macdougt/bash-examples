@@ -49,7 +49,7 @@ alias fw=find_within_function
 alias findwithin=find_within_function
 
 function find_below_function() {
-  find . -name "$1" 
+  find . -name "$1"
 }
 alias fb=find_below_function
 
@@ -91,4 +91,38 @@ function range_function() {
   let offset=1+$2-$1
   tail +$1 $3 | head -$offset 
 }
+
+alias template=template_function
+function template_function() {
+  if [ -f "/templates/$1" ]
+  then
+    echo "Template $1"
+    if [ -z "$2" ]
+    then
+      echo "Creating yo.pl from template $1"
+      # Check for yo.pl
+      if [ -f "./yo.pl" ]
+      then
+        echo "yo.pl exists, not overwriting"
+        return 1
+      else
+        cp /templates/$1 ./yo.pl
+      fi
+    else
+      echo "Creating $2 from template $1"
+      # Check for file existence of 2nd argument 
+      if [ -e "./$1" ]
+      then
+        echo "$2 exists, not overwriting"
+        return 2
+      else
+        cp /templates/$1 ./$2
+      fi
+    fi
+  else
+    echo "No template for $1"
+  fi
+}
+
+
 
