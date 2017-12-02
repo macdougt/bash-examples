@@ -22,6 +22,9 @@ function PreCommand() {
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     # pid, user, pwd, epoch, date readable, tty, hostname
+
+    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\"/\\\"}
+
     cur_pid=$$
     user=$(whoami)
     dir=$(pwd)
@@ -30,7 +33,7 @@ function PreCommand() {
     tty=$(tty)
     cur_host=$(hostname)
     echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
-    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
 
     #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
   fi
@@ -56,7 +59,7 @@ function PostCommand() {
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
     ESC_FULL_COMMAND=${FULL_COMMAND//\"/\\\"}
     echo "[post $CURRENT_COMMAND $cur_pid $dir $epoch $tty $cur_host ${RET_CODE}]" >> $BIG_HISTORY
-    echo "{\"type\":\"post\",\"command\":\"$CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
+    echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
     echo "[full $FULL_COMMAND $user $cur_pid $epoch $(tty)]" >> $BIG_HISTORY
     echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"user\":\"$user\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
     if [ -n "$FIRST_PROMPT" ]; then

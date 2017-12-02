@@ -49,7 +49,7 @@ alias fw=find_within_function
 alias findwithin=find_within_function
 
 function find_below_function() {
-  find . -name "$1"
+  find . -name "$1" 
 }
 alias fb=find_below_function
 
@@ -73,6 +73,8 @@ function hline_function() {
 alias hline=hline_function
 alias sep='echo "";hline 100;echo ""'
 alias mkdir=mkcdir
+
+# Create directory and change to it
 function mkcdir ()
 {
     /bin/mkdir -p -- "$1" &&

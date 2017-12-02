@@ -133,7 +133,10 @@ else
         echo "perl installed already"
 fi
 
-DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.bbh_content' '.dm_content' '.dc_content' '.edit_content' '.mac_content' 'update_installer')
+DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content' '.hist_content' '.dm_content' '.dc_content' '.edit_content' '.mac_content' '.overrides' 'update_installer')
+
+BBH_CONTENT='.bbh_content'
+
 UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq' 'hh')
 MAC_UTILITIES=('new')
 DOCKER_UTILITIES=('docb' 'docs')
@@ -151,6 +154,15 @@ for DOT_FILE in "${DOT_FILES[@]}"
 do
 wget https://raw.githubusercontent.com/macdougt/bash-examples/master/$DOT_FILE -O $DOT_FILE 
 done
+
+# bbh 
+if [ "${BASH_VERSINFO}" -lt 4 ]; then
+  echo "bash less than 4, choosing .bbh_content"
+  wget https://raw.githubusercontent.com/macdougt/bash-examples/master/$BBH_CONTENT -O $BBH_CONTENT 
+else
+  echo "bash greater than or equal to 4, choosing .bbh_content.bash4"
+  wget https://raw.githubusercontent.com/macdougt/bash-examples/master/$BBH_CONTENT.bash4 -O $BBH_CONTENT
+fi
 
 # Grab the bash utilities
 for UTIL in "${UTILITIES[@]}"
