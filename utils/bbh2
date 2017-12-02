@@ -1,0 +1,263 @@
+#!/usr/bin/env perl
+
+
+# TODO fix format on non summary
+#      get the return codes correct
+#      pattern
+
+
+
+use Getopt::Long;
+use JSON;
+use File::ReadBackwards;
+use POSIX 'strftime';
+use Term::ANSIColor qw(colored);
+
+# For date display
+my @months = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+
+GetOptions(
+	'summary' => \my $summary,
+  'all' => \my $all,
+  'lines=i' => \(my $lines=40),
+  'pattern=s' => \my $pattern,
+) or die "Invalid options passed to $0\n";
+#print "$all\n";
+print "Processing $lines lines\n";
+
+my %db;
+my $visible_line_count;
+my $count;
+
+my $bbh_file = $ENV{"HOME"}."/bbh.json";
+tie *BW, 'File::ReadBackwards', $bbh_file or
+                        die "can't read $bbh_file $!" ;
+#use Dumpvalue;
+#my $dumper = new Dumpvalue;
+
+# Iterate over file contents and create hash with epoch key -> row data
+while (<BW>) {
+  next if $_ !~ /\w/;
+	chomp;
+
+  my $cur_line;
+  eval {
+    $cur_line = decode_json $_;
+  };
+
+	if ($@) {
+	  print "Error captured : $@\n";
+	  print "Illegal json: $_\n";
+	  next;
+	}
+	
+	#$dumper->dumpValue($cur_line);
+
+  # Check count
+  #my $key_count = scalar keys %db;
+  if ($visible_line_count >= $lines) {
+    last;
+  }
+
+  if ($$cur_line{"type"} eq "pre") {
+  	my $epoch = $$cur_line{"epoch"};
+
+    # Count matches, assumes that I am counting backwards, pre should always appear higher in the file
+    # than post and full
+    if (exists($db{$epoch}{'full_command'})) {
+    	if (defined($pattern)) {
+    		if ($db{$epoch}{'full_command'} =~ /$pattern/) {
+        	$visible_line_count++;
+     			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
+  				$db{$epoch}{"user"} = $$cur_line{"user"};
+  				$db{$epoch}{"command"} = $$cur_line{"command"};
+    		}
+    	} else {
+        	$visible_line_count++;
+     			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
+  				$db{$epoch}{"user"} = $$cur_line{"user"};
+  				$db{$epoch}{"command"} = $$cur_line{"command"};  		
+    	}
+    }
+  	#print "Added pre $epoch\n";
+  } elsif ($$cur_line{"type"} eq "post") {
+  	my $foreign_epoch;
+  	# Get the id
+  	if ($$cur_line{"id"} =~ /id_(.*)/) {
+  	  $foreign_epoch = $1;
+  	}
+  	$db{$foreign_epoch}{"return_code"} = $$cur_line{"return_code"};
+  	#print "Added post $foreign_epoch\n";
+  } elsif ($$cur_line{"type"} eq "full") {
+   	my $foreign_epoch;
+  	# Get the id
+  	if ($$cur_line{"id"} =~ /id_(.*)/) {
+  	  $foreign_epoch = $1;
+  	}
+  	$db{$foreign_epoch}{"full_command"} = $$cur_line{"command"};
+  	#print "Added full $foreign_epoch\n";
+  } else {
+  	print "WTF\n";
+  }
+}
+close BW;
+
+# Display results
+if ($summary) {
+	#$dumper->dumpValue(\%db);
+	# Consider summaries (combine consecutive commands, combine all same commands, show time frame)
+	# Pandas would allow us to look at this data, by dir, by timeframe, by command
+	my $last_key;
+	my $last_date;
+	my $last_command_env;
+	my $stack_count;
+	my $stack_start_key;
+	my $new_date = 1;
+
+	foreach my $key (sort { $a <=> $b } keys %db) {
+	  # Do not show command and full command if equal
+	  if (exists($db{$key}{'command'}) && exists($db{$key}{'full_command'})) {
+	    
+	    # Summarize the dates and commands
+		  my ($sec, $min, $hour, $day,$month,$year) = (localtime($key))[0,1,2,3,4,5,6];
+	    my $date = $months[$month]." ".&zero_fill($day).", ".($year+1900);
+	    my $time = &zero_fill($hour).":".&zero_fill($min);
+
+	    # Summarize the command
+	    my @cur_command_env = ($db{$key}{'command'}, $db{$key}{'return_code'},$db{$key}{'dir'});
+
+	    # Print first date
+	    # Initialize
+	    if ($new_date) {
+	      print "$date\n";
+	      $new_date = 0;
+	      # To deal with first row
+	      $stack_start_key = $key;
+	      $last_date = $date;
+	      @last_command_env = @cur_command_env;      
+			}
+
+			# If the command env matches the last, add to stack count
+			# otherwise print the last command env
+	    if (&array_equals(\@cur_command_env, \@last_command_env)) {
+	      $stack_count++;
+	    } elsif ($date ne $last_date) {
+	    	# New date
+	      $new_date = 1;
+	      print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+	  		$stack_count = 0;
+	 			$stack_start_key = $key;
+	    } else {
+	    	print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+	 			$stack_count = 1;
+	 			$stack_start_key = $key;
+	    }
+	    
+	    # Keep values
+	    $last_key = $key;
+	    $last_date = $date;
+	    @last_command_env = @cur_command_env;
+	  }
+	}
+
+	# Print the last one
+	print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+} else {
+
+  # Show all (i.e. no summary)
+
+	foreach my $key (sort { $a <=> $b } keys %db) {
+	 # Do not show command and full command if equal
+		if (exists($db{$key}{'command'}) && exists($db{$key}{'full_command'})) {
+		 	my $ts = strftime '%Y/%m/%d %H:%M:%S', localtime $key;
+	    my $command_val = "[$db{$key}{'command'}]";
+
+	    # Consider ignoring space differences (reduce multiple spaces to one)
+			if ($db{$key}{'full_command'} eq $db{$key}{'command'}) {
+			 	 $command_val = "";
+			}
+
+		  #print "$ts - $db{$key}{'full_command'} - $command_val $db{$key}{'return_code'} $db{$key}{'dir'}\n";
+
+		  print "$ts - ";
+		  print colored($db{$key}{'full_command'}, 'blue');
+	  	print colored($command_val, 'red');
+      print " - $db{$key}{'return_code'} $db{$key}{'dir'}\n"
+		}
+	}
+}
+
+
+sub array_equals {
+	my $ra1 = shift;
+	my $ra2 = shift;
+  $equals = 1;
+  foreach (my $i = 0; $i < @$ra1; $i++) {
+      if (! defined $$ra1[$i] || ! defined $$ra2[$i] || $$ra1[$i] ne $$ra2[$i]) { 
+        $equals = 0;
+        last;
+      }
+  }
+  return $equals;
+}
+
+sub print_command_env {
+	my $rh_db = shift;
+	my $start_key = shift;
+	my $last_key = shift;
+	my $stack_count = shift;
+
+	my ($sec, $min, $hour) = (localtime($start_key))[0,1,2,3];
+  my $time1 = &zero_fill($hour).":".&zero_fill($min);
+  
+  # Write in the time(s)
+  my $time_string;
+  if ($stack_count == 1) {
+  	$time_string = "  $time1         | ";
+  } else {
+	  my ($sec, $min, $hour) = (localtime($last_key))[0,1,2,3];
+    my $time2 = &zero_fill($hour).":".&zero_fill($min);
+  	$time_string = "  $time1 - $time2 | ";
+  }
+
+	# Ignore white space in comparison
+  my $command_string;
+	if ($$rh_db{$start_key}{'full_command'} ne $$rh_db{$start_key}{'command'}) {
+	  #print colored( '0123456789', 'magenta' );
+	  #print BLUE "($$rh_db{$start_key}{'full_command'})", RESET;
+	  #print RED "[$$rh_db{$start_key}{'command'}]", RESET;
+	  $command_string = "$$rh_db{$start_key}{'full_command'}     [$$rh_db{$start_key}{'command'}]";
+	} else {
+	  #print BLUE "($$rh_db{$start_key}{'command'})", RESET;
+	  $command_string = "$$rh_db{$start_key}{'full_command'}";
+	}
+  
+  my $stack_string = "";
+	if ($stack_count == 1) {
+	  #print " $db{$start_key}{'return_code'} $db{$start_key}{'dir'}\n";
+	} else {
+		$stack_string = "${stack_count}x";
+	  #print " $db{$start_key}{'return_code'} $db{$start_key}{'dir'}\n";
+  }
+
+format STDOUT =
+  @<<<<<<<<<<<<<<  @<<<<    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  $time_string,$stack_string,$command_string,$db{$start_key}{'return_code'},$db{$start_key}{'dir'}
+.
+
+write;
+
+}
+
+sub zero_fill {
+	my $number = shift;
+	if ($number < 10) {
+		return "0".$number;
+	}
+	return $number;
+}
+
+
+
+
+
