@@ -3,7 +3,7 @@
 # Docker functions
 
 function dockerCleanFunction() {
-   unconnected_images=$(docker images | grep "^<none>" | awk '{print $3}')
+   unconnected_images=$(docker image ls -a | grep "^<none>" | awk '{print $3}')
    if [ -z "$unconnected_images" ]
    then
       echo "Nothing to clean"
@@ -22,7 +22,7 @@ alias dockerkill=dockerKillFunction
 
 # List docker images matching regexp
 function diFunction() {
-  docker image ls | egrep "$1"
+  docker image ls -a | egrep "$1"
 }
 
 alias di=diFunction
