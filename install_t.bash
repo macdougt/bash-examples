@@ -137,7 +137,7 @@ DOT_FILES=('.profile' '.bash_aliases' '.bashrc' '.docker_content' '.dirh_content
 
 BBH_CONTENT='.bbh_content'
 
-UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq' 'hh')
+UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh_unique' 'ips' 'vloc' 'tvi' 'bbq' 'hh' 'bbh2')
 MAC_UTILITIES=('new')
 DOCKER_UTILITIES=('docb' 'docs')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
