@@ -92,6 +92,8 @@ function range_function() {
   tail +$1 $3 | head -$offset 
 }
 
+alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
+
 alias template=template_function
 function template_function() {
   if [ -f "/templates/$1" ]
