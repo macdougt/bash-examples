@@ -26,8 +26,8 @@ function PreCommand() {
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     # pid, user, pwd, epoch, date readable, tty, hostname
 
-    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\"/\\\"}
-
+    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\\/\\\\}
+    ESC_CURRENT_COMMAND=${ESC_CURRENT_COMMAND//\"/\\\"}
     cur_pid=$$
     user=$(whoami)
     dir=$(pwd)
@@ -63,7 +63,9 @@ function PostCommand() {
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
-    ESC_FULL_COMMAND=${FULL_COMMAND//\"/\\\"}
+    ESC_FULL_COMMAND=${FULL_COMMAND//\\/\\\\}
+    ESC_FULL_COMMAND=${ESC_FULL_COMMAND//\"/\\\"}
+
     CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
     echo "[post $CURRENT_COMMAND $dir $epoch $tty $CURRENT_PROCESSING_ID ${RET_CODE}]" >> $BIG_HISTORY
     echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"id\":\"$CURRENT_PROCESSING_ID\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON

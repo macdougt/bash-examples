@@ -135,7 +135,7 @@ if ($summary) {
 	      $stack_start_key = $key;
 	      $last_date = $date;
 	      @last_command_env = @cur_command_env;      
-			}
+		}
 
 			# If the command env matches the last, add to stack count
 			# otherwise print the last command env
@@ -181,8 +181,9 @@ if ($summary) {
 
 		  print "$ts - ";
 		  print colored($db{$key}{'full_command'}, 'blue');
-	  	print colored($command_val, 'red');
-      print " - $db{$key}{'return_code'} $db{$key}{'dir'}\n"
+		  print " ";
+	  	  print colored($command_val, 'red');
+          print " - $db{$key}{'return_code'} $db{$key}{'dir'}\n"
 		}
 	}
 }
