@@ -12,12 +12,14 @@ use JSON;
 use File::ReadBackwards;
 use POSIX 'strftime';
 use Term::ANSIColor qw(colored);
+use Cwd;
 
 # For date display
 my @months = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
 
 GetOptions(
 	'summary' => \my $summary,
+	'cwd' => \my $cwd,
   'all' => \my $all,
   'lines=i' => \(my $lines=40),
   'pattern=s' => \my $pattern,
@@ -65,18 +67,36 @@ while (<BW>) {
     # Count matches, assumes that I am counting backwards, pre should always appear higher in the file
     # than post and full
     if (exists($db{$epoch}{'full_command'})) {
-    	if (defined($pattern)) {
+    	if (defined($pattern) && $cwd) {
+    		my $cwd_val = getcwd;
     		if ($db{$epoch}{'full_command'} =~ /$pattern/) {
-        	$visible_line_count++;
      			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
-  				$db{$epoch}{"user"} = $$cur_line{"user"};
-  				$db{$epoch}{"command"} = $$cur_line{"command"};
+          if ($db{$epoch}{"dir"} eq $cwd_val) { 
+	        	$visible_line_count++;
+	  				$db{$epoch}{"user"} = $$cur_line{"user"};
+	  				$db{$epoch}{"command"} = $$cur_line{"command"};
+	  			}
+    		}
+    	} elsif (defined($pattern)) {
+    		if ($db{$epoch}{'full_command'} =~ /$pattern/) {
+     			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
+	        $visible_line_count++;
+	  			$db{$epoch}{"user"} = $$cur_line{"user"};
+	  			$db{$epoch}{"command"} = $$cur_line{"command"};
+    		}
+    	} elsif ($cwd) {
+    		my $cwd_val = getcwd;
+     		$db{$epoch}{"dir"} = $$cur_line{"pwd"};
+        if ($db{$epoch}{"dir"} eq $cwd_val) { 
+	        $visible_line_count++;
+	  			$db{$epoch}{"user"} = $$cur_line{"user"};
+	  			$db{$epoch}{"command"} = $$cur_line{"command"};
     		}
     	} else {
-        	$visible_line_count++;
-     			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
-  				$db{$epoch}{"user"} = $$cur_line{"user"};
-  				$db{$epoch}{"command"} = $$cur_line{"command"};  		
+        $visible_line_count++;
+     		$db{$epoch}{"dir"} = $$cur_line{"pwd"};
+  			$db{$epoch}{"user"} = $$cur_line{"user"};
+  			$db{$epoch}{"command"} = $$cur_line{"command"};  		
     	}
     }
   	#print "Added pre $epoch\n";
@@ -135,7 +155,7 @@ if ($summary) {
 	      $stack_start_key = $key;
 	      $last_date = $date;
 	      @last_command_env = @cur_command_env;      
-		}
+			}
 
 			# If the command env matches the last, add to stack count
 			# otherwise print the last command env
@@ -182,8 +202,8 @@ if ($summary) {
 		  print "$ts - ";
 		  print colored($db{$key}{'full_command'}, 'blue');
 		  print " ";
-	  	  print colored($command_val, 'red');
-          print " - $db{$key}{'return_code'} $db{$key}{'dir'}\n"
+	  	print colored($command_val, 'red');
+      print " - $db{$key}{'return_code'} $db{$key}{'dir'}\n"
 		}
 	}
 }
