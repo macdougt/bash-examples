@@ -8,6 +8,7 @@
 
 
 use Getopt::Long;
+use Pod::Usage;
 use JSON;
 use File::ReadBackwards;
 use POSIX 'strftime';
@@ -18,13 +19,18 @@ use Cwd;
 my @months = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
 
 GetOptions(
-	'summary' => \my $summary,
-	'cwd' => \my $cwd,
   'all' => \my $all,
+  'cwd' => \my $cwd,
+  'help' => \my $help,
   'lines=i' => \(my $lines=40),
+  'man!' => \my $man,
   'pattern=s' => \my $pattern,
+  'summary' => \my $summary,
 ) or die "Invalid options passed to $0\n";
-#print "$all\n";
+
+pod2usage(-verbose => 1) && exit if defined $help;
+pod2usage(-verbose => 2) && exit if defined $man;
+
 print "Processing $lines lines\n";
 
 my %db;
@@ -278,7 +284,32 @@ sub zero_fill {
 	return $number;
 }
 
+=head1 NAME
 
+ bbh2
 
+=head1 SYNOPSIS
+
+ bbh2 -p ^psql  # search for commands that start with psql
+
+=head1 DESCRIPTION
+
+  Perform search on all captured histories
+
+=head1 ARGUMENTS
+
+ -a, --all       not implemented
+ -c, --cwd       print captured commands from the current directory
+ -h, --help   print Options and Arguments
+ -m, --man       print complete man page
+ -l, --lines     print number of lines matching options
+ -p, --pattern   print commands matching pattern (e.g. ^psql)
+ -s, --summary   print summary, combine commands that match
+
+=head1 AUTHOR
+
+yoman
+
+=cut
 
 
