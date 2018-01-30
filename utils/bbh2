@@ -18,20 +18,24 @@ use Cwd;
 # For date display
 my @months = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
 
+# Set defaults
+my %options = ('lines' => 40);
+
 GetOptions(
-  'all' => \my $all,
-  'cwd' => \my $cwd,
-  'help' => \my $help,
-  'lines=i' => \(my $lines=40),
-  'man!' => \my $man,
-  'pattern=s' => \my $pattern,
-  'summary' => \my $summary,
+	\%options,
+  'all',
+  'cwd',
+  'help',
+  'lines=i',
+  'man',
+  'pattern=s',
+  'summary',
 ) or die "Invalid options passed to $0\n";
 
-pod2usage(-verbose => 1) && exit if defined $help;
-pod2usage(-verbose => 2) && exit if defined $man;
+pod2usage(-verbose => 1) && exit if exists($options{'help'});
+pod2usage(-verbose => 2) && exit if exists($options{'man'});
 
-print "Processing $lines lines\n";
+print "Processing $options{'lines'} lines\n";
 
 my %db;
 my $visible_line_count;
@@ -63,7 +67,7 @@ while (<BW>) {
 
   # Check count
   #my $key_count = scalar keys %db;
-  if ($visible_line_count >= $lines) {
+  if ($visible_line_count >= $options{'lines'}) {
     last;
   }
 
@@ -73,9 +77,9 @@ while (<BW>) {
     # Count matches, assumes that I am counting backwards, pre should always appear higher in the file
     # than post and full
     if (exists($db{$epoch}{'full_command'})) {
-    	if (defined($pattern) && $cwd) {
+    	if (exists($options{'pattern'}) && exists($options{'cwd'})) {
     		my $cwd_val = getcwd;
-    		if ($db{$epoch}{'full_command'} =~ /$pattern/) {
+    		if ($db{$epoch}{'full_command'} =~ /$options{'pattern'}/) {
      			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
           if ($db{$epoch}{"dir"} eq $cwd_val) { 
 	        	$visible_line_count++;
@@ -83,14 +87,14 @@ while (<BW>) {
 	  				$db{$epoch}{"command"} = $$cur_line{"command"};
 	  			}
     		}
-    	} elsif (defined($pattern)) {
-    		if ($db{$epoch}{'full_command'} =~ /$pattern/) {
+    	} elsif (exists($options{'pattern'})) {
+    		if ($db{$epoch}{'full_command'} =~ /$options{'pattern'}/) {
      			$db{$epoch}{"dir"} = $$cur_line{"pwd"};
 	        $visible_line_count++;
 	  			$db{$epoch}{"user"} = $$cur_line{"user"};
 	  			$db{$epoch}{"command"} = $$cur_line{"command"};
     		}
-    	} elsif ($cwd) {
+    	} elsif (exists($options{'cwd'})) {
     		my $cwd_val = getcwd;
      		$db{$epoch}{"dir"} = $$cur_line{"pwd"};
         if ($db{$epoch}{"dir"} eq $cwd_val) { 
@@ -129,7 +133,7 @@ while (<BW>) {
 close BW;
 
 # Display results
-if ($summary) {
+if (exists($options{'summary'})) {
 	#$dumper->dumpValue(\%db);
 	# Consider summaries (combine consecutive commands, combine all same commands, show time frame)
 	# Pandas would allow us to look at this data, by dir, by timeframe, by command
@@ -161,7 +165,7 @@ if ($summary) {
 	      $stack_start_key = $key;
 	      $last_date = $date;
 	      @last_command_env = @cur_command_env;      
-			}
+		}
 
 			# If the command env matches the last, add to stack count
 			# otherwise print the last command env
