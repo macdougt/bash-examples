@@ -35,6 +35,16 @@ GetOptions(
 pod2usage(-verbose => 1) && exit if exists($options{'help'});
 pod2usage(-verbose => 2) && exit if exists($options{'man'});
 
+# If there are no options set and there is a value
+my $numberOptions = keys %hash;
+
+if (! $numberOptions) {
+	my $arg = shift;
+  if ($arg) {
+	  $options{'pattern'} = $arg;  	
+  }
+}
+
 print "Processing $options{'lines'} lines\n";
 
 my %db;
