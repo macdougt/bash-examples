@@ -7,7 +7,7 @@ open (PIPE, "$command |") || die "Sorry, I couldn't open pipe.\n";
   while (<PIPE>) {
      if (/^(\w+)/) {
         $cur_int = $1;
-     } elsif (/\s+inet addr:([\d.]+)/) {
+     } elsif (/\s*inet\s+([\d.]+)/) {
         my $cur_ip = $1;
         print "$cur_int: $cur_ip\n";
      }
