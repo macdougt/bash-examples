@@ -46,11 +46,11 @@ alias dirm=dirmFunction
 
 # Aliases
 
-alias dockerkillall='docker stop $(docker ps -a -q);docker rm $(docker ps -a -q)'
-alias dls='docker images;docker ps -a'
-alias dockerls='docker images;docker ps -a'
-alias dockerlsc='docker ps -a'
-alias dockerkillexit='docker ps -aq -f status=exited | xargs docker rm'
+alias dockerkillall='docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
+alias dls='docker image ls;docker container ls -a'
+alias dockerls=dls
+alias dockerlsc='docker container ls -a'
+alias dockerkillexit='docker container ls -aq -f status=exited | xargs docker rm'
 alias dockerbash=docb
 alias docbroot='docb --user root'
 alias dockerstart=docs
