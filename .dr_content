@@ -3,14 +3,18 @@
 # 
 
 alias registry_ls=image_ls_registry
+
+# List the images from the specified registry
 function image_ls_registry() {
   echo "curl -X GET http://$1/v2/_catalog | jq ."
   curl -X GET http://$1/v2/_catalog | jq .
 }
 
 alias tag_ls=tags_ls_image
+
+# List the tags from the specified registry and image
 function tags_ls_image() {
-  echo "curl -X GET https://$1/v2/$2/$3/tags/list | jq ."
-  curl -X GET https://$1/v2/$2/$3/tags/list | jq .
+  echo "curl -X GET https://$1/v2/$2/tags/list | jq ."
+  curl -X GET https://$1/v2/$2/tags/list | jq .
 }
 
