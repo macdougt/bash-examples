@@ -53,6 +53,12 @@ function find_below_function() {
 }
 alias fb=find_below_function
 
+function find_within_no_binary_function() {
+  find . -type f -exec file {} + |   awk -F: '/ASCII text/ {print $1}' | xargs grep $1
+}
+alias fw_no_binary=find_within_no_binary_function
+alias fwnb=find_within_no_binary_function
+
 alias eh="list ${HOME}/.edit_history"
 
 function title {
