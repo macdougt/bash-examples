@@ -1,4 +1,4 @@
-for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_content,dc_content,hist_content,edit_content,optional_content}; do
+for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_content,dc_content,dr_content,hist_content,edit_content,optional_content}; do
 	[[ -r "$file" ]] && [[ -f "$file" ]] && source "$file"
 done
 unset file
