@@ -15,7 +15,8 @@ function dockerCleanFunction() {
 alias dockerclean=dockerCleanFunction
 
 function dockerKillFunction() {
-   docker stop $*;docker rm $*
+  echo "Killing $*"
+  docker stop $*;docker rm $*
 }
 
 alias dockerkill=dockerKillFunction
@@ -46,11 +47,11 @@ alias dirm=dirmFunction
 
 # Aliases
 
-alias dockerkillall='docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
+alias dockerkillall='echo "Killing all containers";docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
 alias dls='docker image ls;docker container ls -a'
 alias dockerls=dls
 alias dockerlsc='docker container ls -a'
-alias dockerkillexit='docker container ls -aq -f status=exited | xargs docker rm'
+alias dockerkillexit='echo "Killing exited containers";docker container ls -aq -f status=exited | xargs docker rm'
 alias dockerbash=docb
 alias docbroot='docb --user root'
 alias dockerstart=docs
