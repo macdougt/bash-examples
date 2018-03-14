@@ -91,7 +91,10 @@ function mkcdir ()
 
 alias tgz=tgz_function
 function tgz_function() {
-  tar cvfz $1.tgz $1
+  filename=$1
+  filename_no_end_slash=${filename%%+(/)}
+  echo "tar cvfz $filename_no_end_slash.tgz $filename_no_end_slash"
+  tar cvfz $filename_no_end_slash.tgz $filename_no_end_slash
 }
 
 alias range=range_function
