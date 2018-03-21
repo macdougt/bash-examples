@@ -47,6 +47,8 @@ alias dirm=dirmFunction
 
 # Aliases
 
+alias containers='docker container ls -a'
+alias images='docker image ls'
 alias dockerkillall='echo "Killing all containers";docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
 alias dls='docker image ls;docker container ls -a'
 alias dockerls=dls
