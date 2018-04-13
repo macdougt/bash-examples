@@ -57,23 +57,29 @@ tie *BW, 'File::ReadBackwards', $bbh_file or
                         die "can't read $bbh_file $!" ;
 #use Dumpvalue;
 #my $dumper = new Dumpvalue;
+my $buffer;
 
 # Iterate over file contents and create hash with epoch key -> row data
 while (<BW>) {
-  next if $_ !~ /\w/;
+ next if $_ !~ /.+/;
   chomp;
+ # Buffer the JSON structure
+ $buffer = $_.$buffer;
+  if ($buffer !~ /^\s*\{/) {
+   next;
+ }
 
-  my $cur_line;
-  eval {
-    $cur_line = decode_json $_;
-  };
+ my $cur_line;
+ eval {
+   $cur_line = decode_json $buffer;
+   $buffer = "";
+ };
 
-  if ($@) {
-    $error_count++;
-    #print "Error captured : $@\n";
-    #print "Illegal json: $_\n";
+ if ($@) {
+    print "Error captured : $@\n";
+    print "Illegal json: $_\n";
     next;
-  }
+ }
   
   #$dumper->dumpValue($cur_line);
 
