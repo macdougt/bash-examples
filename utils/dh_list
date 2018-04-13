@@ -10,7 +10,7 @@ my %tags;
 if ($tag_file =~ /\w/ && -f $tag_file) {
   open (TAG_FILE, "< $tag_file") || die "Sorry, I couldn't read $tag_file.\\n";
   while (<TAG_FILE>) {
-    if (/([^\/]+)\s+([\w\/]+)/) {
+    if (/([^\/]+)\s+([\w\/\-_]+)/) {
       $tags{$2}=$1;
     }
   }
