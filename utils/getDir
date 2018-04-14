@@ -11,6 +11,7 @@
 #
 # positive number n -> go to the directory history's nth entry
 #
+use IO::Prompt;
 
 my $cdInput = shift;
 
@@ -102,30 +103,85 @@ sub printMatchingLines {
            }
         }
    }
-   printPick(\@matches);
+   print prompt_user("Make your choice",\@matches,"");(\@matches);
 }
 
-# Print an interactive choice from a given list
-sub printPick {
-   my $ra_list = shift;
-   if ($#{$ra_list} > 0) {
-        print STDERR "List:\n";
-        for (my $i=0; $i <= $#{$ra_list}; $i++) {
-           print STDERR ($i+1);
-           print STDERR ") $$ra_list[$i]\n";
-        }
-        print STDERR "Make your choice\n";
-        my $choice = <>;
-        if ($choice =~ /\d+/) {
-           print "$$ra_list[$choice-1]";
-        }
-   } elsif ($#{$ra_list} == 0) {
-        print "$$ra_list[0]";
-   } else {
-        print STDERR "No list\n";
-   }
-}
+# Prompt user for input on list choice
+# Provide shortcuts (i.e. letters or single digits)
+sub prompt_user {
 
+  my $prompt_string = shift;
+  my $ra_list = shift;
+  my $match = shift;
+  my $callback = shift;
+  if (! defined($callback)) {
+      $callback = sub { return; };
+  }
+
+  my @new_list;
+
+  print STDERR "$prompt_string\n";
+
+  # Display list
+  my $list_length = $#{$ra_list};
+  my $excess;
+  if ( $list_length > 0 ) {
+    print STDERR "List:\n";
+    if (length($match)) {
+      # Reset the list to the matching list
+      for ( my $i = 0 ; $i <= $list_length ; $i++ ) {
+        if ( $$ra_list[$i] =~ /$match/) {
+          push(@new_list, $$ra_list[$i]);
+        }
+      }
+      $ra_list = \@new_list;
+      $list_length = $#{$ra_list};
+      $excess = $list_length - 26;
+    }
+
+    for ( my $i = 0 ; $i <= $list_length ; $i++ ) {
+      printf STDERR "%-3s", ($i + 1);
+      # In the last 26?
+      $excess = $list_length - 26;
+      if ($i > $excess) {
+        print STDERR "[".chr(96+$i-$excess)."]\t$$ra_list[$i]\n";
+      } else {
+        print STDERR ")\t$$ra_list[$i]\n";
+      }
+    }
+  }
+
+  # Is there only one result
+  if ( $list_length == 0 ) {
+    print STDERR "Matched one: $$ra_list[0]\n";
+    return $$ra_list[0];
+  }
+
+  # More than one result
+  my $done = 0;
+  my $choice = "";
+  while (! $done) {
+    my $key = prompt '', -1;
+    $choice .= $key;
+    if ($key =~ /\d/) {
+      if ($list_length < 10) {
+        my $ret_val = $$ra_list[$key-1];
+        &$callback($ret_val);
+        return $ret_val;
+      }
+    } elsif ($key =~/[a-z]/) {
+      my $ret_val = $$ra_list[ord($key)-96+$excess];
+      &$callback($ret_val);
+      return $ret_val;
+    } else {
+      # catch the return
+      $done = 1;
+      my $ret_val = $$ra_list[$choice-1];
+      &$callback($ret_val);
+      return $ret_val;
+    }
+  }
+}
 
 # Return the nth line from file with file handle fh
 sub getNthLine {
