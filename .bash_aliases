@@ -100,7 +100,11 @@ function tgz_function() {
 alias range=range_function
 function range_function() {
   let offset=1+$2-$1
-  tail +$1 $3 | head -$offset 
+  if [ -z $3 ]; then
+    tail +$1 | head -$offset
+  else
+    tail +$1 $3 | head -$offset
+  fi 
 }
 
 alias write_function='type -a'
