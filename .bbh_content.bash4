@@ -6,13 +6,14 @@
 BIG_HISTORY="${HOME}/.bash_big_history"
 export BBH=$BIG_HISTORY
 export BBH_JSON="${HOME}/bbh.json"
+export BBH_JSON_MERGED="${HOME}/bbh_merged.json"
 
 # Global map of tty to unique _id (id_+=timestamp at key creation)
 declare -A COMMAND_MAP
-#LAST_PROCESSED_ID=""
 
 # This will run before any command is executed.
 function PreCommand() {
+
   if [ -z "$AT_PROMPT" ]; then
     return
   fi
@@ -25,7 +26,6 @@ function PreCommand() {
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     # pid, user, pwd, epoch, date readable, tty, hostname
-
     export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\\/\\\\}
     ESC_CURRENT_COMMAND=${ESC_CURRENT_COMMAND//\"/\\\"}
     cur_pid=$$
@@ -38,9 +38,8 @@ function PreCommand() {
     echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
     echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
     # Add entry to map
-    current_id="id_$epoch"
-    COMMAND_MAP[$tty]=$current_id
-    #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
+    current_id="$epoch"
+    COMMAND_MAP[$tty,pwd]=$dir
   fi
 }
 
@@ -51,8 +50,7 @@ trap "PreCommand" DEBUG
 # the first prompt).
 FIRST_PROMPT=1
 function PostCommand() {
-  RET_CODE=$?
-  #echo "RRRR ${RET_CODE}"
+  local RET_CODE="$?"
   cur_pid=$$
   user=$(whoami)
   dir=$(pwd)
@@ -71,9 +69,10 @@ function PostCommand() {
     echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"id\":\"$CURRENT_PROCESSING_ID\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
     echo "[full $FULL_COMMAND $CURRENT_PROCESSING_ID]" >> $BIG_HISTORY
     echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\"}" >> $BBH_JSON
+    echo "{\"command_before\":\"$CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":\"$epoch\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\",\"tty\":\"$tty\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON_MERGED
     # Remove the tty key and replace the last processed, what happens in the first run
     unset COMMAND_MAP[$tty]
-    #LAST_PROCESSED_ID=$CURRENT_PROCESSING_ID
+    unset COMMAND_MAP[$tty,pwd]
 
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT

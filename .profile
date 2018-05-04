@@ -36,7 +36,7 @@ function _update_ps1() {
 
 if command -v powerline-shell > /dev/null 2>&1; then
   if [ "$TERM" != "linux" ]; then
-    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+    PROMPT_COMMAND="$PROMPT_COMMAND;_update_ps1"
   fi
 else
   echo "powerline-shell not found"
