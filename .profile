@@ -1,4 +1,4 @@
-for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_content,dc_content,dr_content,hist_content,edit_content,optional_content}; do
+for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_content,dc_content,hist_content,edit_content,optional_content}; do
 	[[ -r "$file" ]] && [[ -f "$file" ]] && source "$file"
 done
 unset file
@@ -29,16 +29,11 @@ shopt -s histappend
 # Autocorrect typos in path names when using `cd`
 shopt -s cdspell
 
-# Powerline; check if powerline is used
-function _update_ps1() {
-  PS1="$(powerline-shell $?)"
-}
-
-if command -v powerline-shell > /dev/null 2>&1; then
-  if [ "$TERM" != "linux" ]; then
-    PROMPT_COMMAND="$PROMPT_COMMAND;_update_ps1"
-  fi
-else
-  echo "powerline-shell not found"
-fi
+#if command -v powerline-shell > /dev/null 2>&1; then
+#  if [ "$TERM" != "linux" ]; then
+#    PROMPT_COMMAND="$PROMPT_COMMAND;_update_ps1;"
+#  fi
+#else
+#  echo "powerline-shell not found"
+#fi
 
