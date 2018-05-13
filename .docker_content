@@ -47,12 +47,13 @@ alias dirm=dirmFunction
 
 # Aliases
 
-alias containers='docker container ls -a'
-alias images='docker image ls'
+alias containers='docker container ls -a | gtac'
+alias images='docker image ls | gtac'
 alias dockerkillall='echo "Killing all containers";docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
 alias dls='docker image ls;docker container ls -a'
 alias dockerls=dls
 alias dockerlsc='docker container ls -a'
+alias dockerkillcreate='echo "Killing created containers";docker container ls -aq -f status=created | xargs docker rm'
 alias dockerkillexit='echo "Killing exited containers";docker container ls -aq -f status=exited | xargs docker rm'
 alias dockerbash=docb
 alias docbroot='docb --user root'
