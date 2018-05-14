@@ -1,0 +1,11 @@
+sudo: required
+services:
+  - docker
+#env:
+#  global:
+#    - REGISTRY_USER=myrobot
+    # REGISTRY_PASS=...
+#    - secret: "<something long>"
+
+script:
+  - docker build --tag bashex/env_image .
