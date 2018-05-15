@@ -3,9 +3,7 @@ services:
   - docker
 #env:
 #  global:
-#    - REGISTRY_USER=myrobot
-    # REGISTRY_PASS=...
-#    - secret: "<something long>"
+#    - TEST: value
 
 script:
   - docker build --tag bashex/env_image .
