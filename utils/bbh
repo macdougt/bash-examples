@@ -1,0 +1,324 @@
+#!/usr/bin/env perl
+
+
+# TODO fix format on non summary
+#      get the return codes correct
+#      pattern
+
+use Getopt::Long;
+use Pod::Usage;
+use JSON;
+use File::ReadBackwards;
+use POSIX 'strftime';
+use Term::ANSIColor qw(colored);
+use Cwd;
+
+# For date display
+my @months = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+
+# Set defaults
+my %options = ('lines' => 40);
+
+GetOptions(
+  \%options,
+  'all',
+  'cwd',
+  'help',
+  'lines=i',
+  'man',
+  'pattern=s',
+  'summary',
+) or die "Invalid options passed to $0\n";
+
+pod2usage(-verbose => 1) && exit if exists($options{'help'});
+pod2usage(-verbose => 2) && exit if exists($options{'man'});
+
+# If there are no options set and there is a value
+my $numberOptions = keys %hash;
+
+if (! $numberOptions) {
+  my $arg = shift;
+  if ($arg) {
+    $options{'pattern'} = $arg;    
+  }
+}
+
+print "Processing $options{'lines'} lines\n";
+
+my %db;
+my $visible_line_count;
+my $count;
+my $error_count;
+
+my $bbh_file = $ENV{"HOME"}."/bbh_merged.json";
+tie *BW, 'File::ReadBackwards', $bbh_file or
+                        die "can't read $bbh_file $!" ;
+#use Dumpvalue;
+#my $dumper = new Dumpvalue;
+my $buffer;
+
+# Iterate over file contents from bottom up and create hash with epoch key -> row data
+while (<BW>) {
+  next if $_ !~ /.+/;
+  chomp;
+  # Buffer the JSON structure
+  $buffer = $_.$buffer;
+  if ($buffer !~ /^\s*\{/) {
+    next;
+  }
+
+  my $cur_line;
+  eval {
+    $cur_line = decode_json $buffer;
+    $buffer = "";
+  };
+
+  if ($@) {
+    print "Error captured : $@\n";
+    print "Illegal json: $_\n";
+    next;
+  }
+  
+  #$dumper->dumpValue($cur_line);
+
+  # Check count if necessary
+  if ($visible_line_count >= $options{'lines'}) {
+    last;
+  }
+
+  my $epoch = $$cur_line{"epoch"};
+
+  # Count matches, assumes that I am counting backwards, pre should always appear higher in the file
+  # than post and full
+  if (exists($options{'pattern'}) && exists($options{'cwd'})) {
+    my $cwd_val = getcwd;
+    if ($$cur_line{"pwd_before"} eq $cwd_val
+        && ($$cur_line{'command'} =~ /$options{'pattern'}/
+        || $$cur_line{'command_before'} =~ /$options{'pattern'}/)) {
+      # Set the row to the hash 
+      $db{$epoch} = $cur_line;
+      $visible_line_count++;
+    }
+  } elsif (exists($options{'pattern'})) {
+    if ($$cur_line{'command'} =~ /$options{'pattern'}/
+        || $$cur_line{'command_before'} =~ /$options{'pattern'}/) {
+      $db{$epoch} = $cur_line;
+      $visible_line_count++;
+    }
+  } elsif (exists($options{'cwd'})) {
+    my $cwd_val = getcwd;
+    if ($$cur_line{"pwd_before"} eq $cwd_val) { 
+      $db{$epoch} = $cur_line;
+      $visible_line_count++;
+    }
+  } else {
+    $visible_line_count++;
+    $db{$epoch} = $cur_line;
+  }
+}
+
+#   } elsif ($$cur_line{"type"} eq "post") {
+#     my $foreign_epoch;
+#     # Get the id
+#     if ($$cur_line{"id"} =~ /id_(.*)/) {
+#       $foreign_epoch = $1;
+#     }
+#     $db{$foreign_epoch}{"return_code"} = $$cur_line{"return_code"};
+#     #print "Added post $foreign_epoch\n";
+#   } elsif ($$cur_line{"type"} eq "full") {
+#      my $foreign_epoch;
+#     # Get the id
+#     if ($$cur_line{"id"} =~ /id_(.*)/) {
+#       $foreign_epoch = $1;
+#     }
+#     $db{$foreign_epoch}{"command_before"} = $$cur_line{"command"};
+#     #print "Added full $foreign_epoch\n";
+#   } else {
+#     print "WTF\n";
+#   }
+# }
+close BW;
+
+# Display results
+
+# Error count
+if ($error_count) {
+	print "Found $error_count errors\n";
+}
+
+# Build the results array
+if (exists($options{'summary'})) {
+  #$dumper->dumpValue(\%db);
+  # Consider summaries (combine consecutive commands, combine all same commands, show time frame)
+  # Pandas would allow us to look at this data, by dir, by timeframe, by command
+  my $last_key;
+  my $last_date;
+  my $last_command_env;
+  my $stack_count;
+  my $stack_start_key;
+  my $new_date = 1;
+
+  foreach my $key (sort { $a <=> $b } keys %db) {
+    # Do not show command and full command if equal
+    if (exists($db{$key}{'command'}) && exists($db{$key}{'command_before'})) {
+      
+      # Summarize the dates and commands
+      my ($sec, $min, $hour, $day,$month,$year) = (localtime($key))[0,1,2,3,4,5,6];
+      my $date = $months[$month]." ".&zero_fill($day).", ".($year+1900);
+      my $time = &zero_fill($hour).":".&zero_fill($min);
+
+      # Summarize the command
+      my @cur_command_env = ($db{$key}{'command'}, $db{$key}{'return_code'},$db{$key}{'pwd'});
+
+      # Print first date
+      # Initialize
+      if ($new_date) {
+        print "$date\n";
+        $new_date = 0;
+        # To deal with first row
+        $stack_start_key = $key;
+        $last_date = $date;
+        @last_command_env = @cur_command_env;      
+      }
+
+      # If the command env matches the last, add to stack count
+      # otherwise print the last command env
+      if (&array_equals(\@cur_command_env, \@last_command_env)) {
+        $stack_count++;
+      } elsif ($date ne $last_date) {
+        # New date
+        $new_date = 1;
+        print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+        $stack_count = 0;
+        $stack_start_key = $key;
+      } else {
+        print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+        $stack_count = 1;
+        $stack_start_key = $key;
+      }
+      
+      # Keep values
+      $last_key = $key;
+      $last_date = $date;
+      @last_command_env = @cur_command_env;
+    }
+  }
+
+  # Print the last one
+  print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
+} else {
+
+  # Show all (i.e. no summary)
+  foreach my $key (sort { $a <=> $b } keys %db) {
+   # Do not show command and full command if equal
+    if (exists($db{$key}{'command'}) && exists($db{$key}{'command_before'})) {
+      my $ts = strftime '%Y/%m/%d %H:%M:%S', localtime $key;
+      my $command_val = "[$db{$key}{'command'}]";
+
+      # Consider ignoring space differences (reduce multiple spaces to one)
+      if ($db{$key}{'command_before'} eq $db{$key}{'command'}) {
+          $command_val = "";
+      }
+
+      print "$ts - ";
+      print colored($db{$key}{'command_before'}, 'blue');
+      print " ";
+      print colored($command_val, 'red');
+      print " - $db{$key}{'return_code'} $db{$key}{'pwd'}\n"
+    }
+  }
+}
+
+
+sub array_equals {
+  my $ra1 = shift;
+  my $ra2 = shift;
+  $equals = 1;
+  foreach (my $i = 0; $i < @$ra1; $i++) {
+      if (! defined $$ra1[$i] || ! defined $$ra2[$i] || $$ra1[$i] ne $$ra2[$i]) { 
+        $equals = 0;
+        last;
+      }
+  }
+  return $equals;
+}
+
+sub print_command_env {
+  my $rh_db = shift;
+  my $start_key = shift;
+  my $last_key = shift;
+  my $stack_count = shift;
+
+  my ($sec, $min, $hour) = (localtime($start_key))[0,1,2,3];
+  my $time1 = &zero_fill($hour).":".&zero_fill($min);
+  
+  # Write in the time(s)
+  my $time_string;
+  if ($stack_count == 1) {
+    $time_string = "  $time1         | ";
+  } else {
+    my ($sec, $min, $hour) = (localtime($last_key))[0,1,2,3];
+    my $time2 = &zero_fill($hour).":".&zero_fill($min);
+    $time_string = "  $time1 - $time2 | ";
+  }
+
+  # Ignore white space in comparison
+  my $command_string;
+  if ($$rh_db{$start_key}{'command_before'} ne $$rh_db{$start_key}{'command'}) {
+    $command_string = "$$rh_db{$start_key}{'command_before'}     [$$rh_db{$start_key}{'command'}]";
+  } else {
+    $command_string = "$$rh_db{$start_key}{'command_before'}";
+  }
+  
+  my $stack_string = "";
+  if ($stack_count == 1) {
+    #print " $db{$start_key}{'return_code'} $db{$start_key}{'pwd'}\n";
+  } else {
+    $stack_string = "${stack_count}x";
+    #print " $db{$start_key}{'return_code'} $db{$start_key}{'pwd'}\n";
+  }
+
+formline <<'END', $time_string,$stack_string,$command_string,$db{$start_key}{'return_code'},$db{$start_key}{'pwd'};
+  @<<<<<<<<<<<<<<  @<<<<    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+END
+print $^A;
+$^A = "";
+}
+
+sub zero_fill {
+  my $number = shift;
+  if ($number < 10) {
+    return "0".$number;
+  }
+  return $number;
+}
+
+=head1 NAME
+
+ bbh2
+
+=head1 SYNOPSIS
+
+ bbh2 -p ^psql  # search for commands that start with psql
+
+=head1 DESCRIPTION
+
+  Perform search on all captured histories
+
+=head1 ARGUMENTS
+
+ -a, --all       not implemented
+ -c, --cwd       print captured commands from the current directory
+ -h, --help   print Options and Arguments
+ -m, --man       print complete man page
+ -l, --lines     print number of lines matching options
+ -p, --pattern   print commands matching pattern (e.g. ^psql)
+ -s, --summary   print summary, combine commands that match
+
+=head1 AUTHOR
+
+yoman
+
+=cut
+
+
