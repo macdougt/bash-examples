@@ -4,7 +4,9 @@ services:
 #env:
 #  global:
 #    - TEST: value
-
+before_script:
+  - echo 'Canada/Eastern' | sudo tee /etc/timezone
+  - sudo dpkg-reconfigure --frontend noninteractive tzdata
 script:
   - docker build --tag bashex/env_image .
   - docker run -it bashex/env_image
