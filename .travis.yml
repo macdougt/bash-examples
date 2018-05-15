@@ -7,3 +7,4 @@ services:
 
 script:
   - docker build --tag bashex/env_image .
+  - docker run -it bashex/env_image

@@ -1,0 +1,20 @@
+#!/usr/bin/env expect
+
+spawn bash
+
+set prompt {\# $};
+expect -re $prompt
+send "source ~/.profile\r";
+
+expect "$ "
+send "ls\r";
+
+expect "$ "
+send "cd /tmp\r";
+
+expect "$ "
+send "dh\r";
+
+expect "$ "
+
+#interact
