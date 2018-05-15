@@ -60,8 +60,11 @@ function PostCommand() {
   tty=$(tty)
   cur_host=$(hostname)
 
-  PS1="$(powerline-shell $RET_CODE)"
-
+  # Use powerline-shell if available
+  if [ -x "$(command -v powerline-shell)" ]; then
+    PS1="$(powerline-shell $RET_CODE)"
+  fi
+  
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
