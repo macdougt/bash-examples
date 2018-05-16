@@ -1,11 +1,18 @@
 FROM ubuntu:latest
 
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
     expect \
     build-essential \
-    perl
+    perl \
+    apt-utils \
+    tzdata
+    
+RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
+RUN dpkg-reconfigure --frontend noninteractive tzdata
 
 RUN curl -L https://cpanmin.us | perl - App::cpanminus
 
