@@ -38,7 +38,7 @@ function cdd() {
   then
     dirHistoryFunction
   else 
-    cd `getDir $1`; 
+    cd `getDir $*`; 
   fi
 }
 

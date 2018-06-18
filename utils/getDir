@@ -13,7 +13,8 @@
 #
 use IO::Prompt;
 
-my $cdInput = shift;
+# Assume multiple arguments means the string includes spaces
+my $cdInput = join(' ', @ARGV);
 
 # The file that stores the directory history
 my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
