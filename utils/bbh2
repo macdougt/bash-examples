@@ -5,8 +5,6 @@
 #      get the return codes correct
 #      pattern
 
-
-
 use Getopt::Long;
 use Pod::Usage;
 use JSON;
@@ -59,7 +57,7 @@ tie *BW, 'File::ReadBackwards', $bbh_file or
 #my $dumper = new Dumpvalue;
 my $buffer;
 
-# Iterate over file contents and create hash with epoch key -> row data
+# Iterate over file contents from bottom up and create hash with epoch key -> row data
 while (<BW>) {
  next if $_ !~ /.+/;
   chomp;
@@ -83,8 +81,7 @@ while (<BW>) {
   
   #$dumper->dumpValue($cur_line);
 
-  # Check count
-  #my $key_count = scalar keys %db;
+  # Check count if necessary
   if ($visible_line_count >= $options{'lines'}) {
     last;
   }
@@ -98,7 +95,7 @@ while (<BW>) {
       if (exists($options{'pattern'}) && exists($options{'cwd'})) {
         my $cwd_val = getcwd;
         if ($db{$epoch}{'full_command'} =~ /$options{'pattern'}/) {
-           $db{$epoch}{"dir"} = $$cur_line{"pwd"};
+          $db{$epoch}{"dir"} = $$cur_line{"pwd"};
           if ($db{$epoch}{"dir"} eq $cwd_val) { 
             $visible_line_count++;
             $db{$epoch}{"user"} = $$cur_line{"user"};
@@ -107,7 +104,7 @@ while (<BW>) {
         }
       } elsif (exists($options{'pattern'})) {
         if ($db{$epoch}{'full_command'} =~ /$options{'pattern'}/) {
-           $db{$epoch}{"dir"} = $$cur_line{"pwd"};
+          $db{$epoch}{"dir"} = $$cur_line{"pwd"};
           $visible_line_count++;
           $db{$epoch}{"user"} = $$cur_line{"user"};
           $db{$epoch}{"command"} = $$cur_line{"command"};
@@ -122,26 +119,18 @@ while (<BW>) {
         }
       } else {
         $visible_line_count++;
-         $db{$epoch}{"dir"} = $$cur_line{"pwd"};
+        $db{$epoch}{"dir"} = $$cur_line{"pwd"};
         $db{$epoch}{"user"} = $$cur_line{"user"};
         $db{$epoch}{"command"} = $$cur_line{"command"};      
       }
     }
     #print "Added pre $epoch\n";
   } elsif ($$cur_line{"type"} eq "post") {
-    my $foreign_epoch;
-    # Get the id
-    if ($$cur_line{"id"} =~ /id_(.*)/) {
-      $foreign_epoch = $1;
-    }
+    my $foreign_epoch = $$cur_line{"id"};
     $db{$foreign_epoch}{"return_code"} = $$cur_line{"return_code"};
     #print "Added post $foreign_epoch\n";
   } elsif ($$cur_line{"type"} eq "full") {
-     my $foreign_epoch;
-    # Get the id
-    if ($$cur_line{"id"} =~ /id_(.*)/) {
-      $foreign_epoch = $1;
-    }
+    my $foreign_epoch = $$cur_line{"id"};
     $db{$foreign_epoch}{"full_command"} = $$cur_line{"command"};
     #print "Added full $foreign_epoch\n";
   } else {
@@ -157,6 +146,7 @@ if ($error_count) {
 	print "Found $error_count errors\n";
 }
 
+# Build the results array
 if (exists($options{'summary'})) {
   #$dumper->dumpValue(\%db);
   # Consider summaries (combine consecutive commands, combine all same commands, show time frame)
@@ -223,15 +213,13 @@ if (exists($options{'summary'})) {
   foreach my $key (sort { $a <=> $b } keys %db) {
    # Do not show command and full command if equal
     if (exists($db{$key}{'command'}) && exists($db{$key}{'full_command'})) {
-       my $ts = strftime '%Y/%m/%d %H:%M:%S', localtime $key;
+      my $ts = strftime '%Y/%m/%d %H:%M:%S', localtime $key;
       my $command_val = "[$db{$key}{'command'}]";
 
       # Consider ignoring space differences (reduce multiple spaces to one)
       if ($db{$key}{'full_command'} eq $db{$key}{'command'}) {
           $command_val = "";
       }
-
-      #print "$ts - $db{$key}{'full_command'} - $command_val $db{$key}{'return_code'} $db{$key}{'dir'}\n";
 
       print "$ts - ";
       print colored($db{$key}{'full_command'}, 'blue');
@@ -278,12 +266,8 @@ sub print_command_env {
   # Ignore white space in comparison
   my $command_string;
   if ($$rh_db{$start_key}{'full_command'} ne $$rh_db{$start_key}{'command'}) {
-    #print colored( '0123456789', 'magenta' );
-    #print BLUE "($$rh_db{$start_key}{'full_command'})", RESET;
-    #print RED "[$$rh_db{$start_key}{'command'}]", RESET;
     $command_string = "$$rh_db{$start_key}{'full_command'}     [$$rh_db{$start_key}{'command'}]";
   } else {
-    #print BLUE "($$rh_db{$start_key}{'command'})", RESET;
     $command_string = "$$rh_db{$start_key}{'full_command'}";
   }
   
@@ -295,13 +279,10 @@ sub print_command_env {
     #print " $db{$start_key}{'return_code'} $db{$start_key}{'dir'}\n";
   }
 
-format STDOUT =
-  @<<<<<<<<<<<<<<  @<<<<    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  $time_string,$stack_string,$command_string,$db{$start_key}{'return_code'},$db{$start_key}{'dir'}
-.
-
-write;
-
+formline <<'END', $time_string,$stack_string,$command_string,$db{$start_key}{'return_code'},$db{$start_key}{'dir'};
+  @<<<<<<<<<<<<<<  @<<<<    @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< @<<< @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+END
+print $^A;
 }
 
 sub zero_fill {
