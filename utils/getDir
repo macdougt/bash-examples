@@ -14,7 +14,11 @@
 use IO::Prompt;
 
 # Assume multiple arguments means the string includes spaces
-my $cdInput = join(' ', @ARGV);
+# Have to consume all arguments
+my $cdInput = shift;
+while (@ARGV) {
+  $cdInput .= " ".shift();
+}
 
 # The file that stores the directory history
 my $dirHistoryFile = $ENV{"HOME"}."/.dirhistory";
