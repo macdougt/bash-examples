@@ -26,6 +26,8 @@ function diFunction() {
   docker image ls -a | egrep "$1"
 }
 
+alias dis='docker image ls --format "{{.Size}}\t{{.Repository}}" | gsort -h'
+
 alias di=diFunction
 
 function dirmFunction() {
