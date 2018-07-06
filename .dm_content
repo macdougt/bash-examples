@@ -33,6 +33,13 @@ function dockerMachineClean() {
   docker-machine rm -f $(docker-machine ls -q)
 }
 
+alias dmd=dockerMachineDisconnect
+
+function dockerMachineDisconnect() {
+  eval $(docker-machine env -u)
+  docker-machine ls
+}
+
 alias dmclean=dockerMachineClean
 
 
