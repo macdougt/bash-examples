@@ -3,10 +3,8 @@
 # TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
 # contribute
 
-BIG_HISTORY="${HOME}/.bash_big_history"
-export BBH=$BIG_HISTORY
-export BBH_JSON="${HOME}/bbh.json"
 export BBH_JSON_MERGED="${HOME}/bbh_merged.json"
+export BBH=$BBH_JSON_MERGED
 
 # Global map of tty to unique _id (id_+=timestamp at key creation)
 declare -A COMMAND_MAP
@@ -21,8 +19,6 @@ function PreCommand() {
   FULL_COMMAND1=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
   CURRENT_COMMAND=$BASH_COMMAND
   export CURRENT_COMMAND
-  #echo "--$CURRENT_COMMAND--"
-  #echo "--$FULL_COMMAND1--"
 
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
@@ -36,9 +32,8 @@ function PreCommand() {
     date_nice=$(date)
     tty=$(tty)
     cur_host=$(hostname)
-    echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
-    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
-    # Add entry to map
+
+    # Add entry to map, use tty and directory to keep uniqueness
     current_id="$epoch"
     COMMAND_MAP[$tty]=$current_id
     COMMAND_MAP[$tty,pwd]=$dir
@@ -72,11 +67,10 @@ function PostCommand() {
     ESC_FULL_COMMAND=${ESC_FULL_COMMAND//\"/\\\"}
 
     CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
-    echo "[post $CURRENT_COMMAND $dir $epoch $tty $CURRENT_PROCESSING_ID ${RET_CODE}]" >> $BIG_HISTORY
-    echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"id\":\"$CURRENT_PROCESSING_ID\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
-    echo "[full $FULL_COMMAND $CURRENT_PROCESSING_ID]" >> $BIG_HISTORY
-    echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\"}" >> $BBH_JSON
+
+    # Add entry to BBH
     echo "{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":\"$epoch\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\",\"tty\":\"$tty\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON_MERGED
+
     # Remove the tty key and replace the last processed, what happens in the first run
     unset COMMAND_MAP[$tty]
     unset COMMAND_MAP[$tty,pwd]
@@ -89,7 +83,7 @@ function PostCommand() {
     # Consider next command
     >&2 printf '\e[38;2;90;90;90m'
     >&2 echo -n "Seen $CURRENT_COMMAND: "
-    >&2 grep -c "pre.*$CURRENT_COMMAND" $BIG_HISTORY
+    >&2 grep -c "\"command\":\"$CURRENT_COMMAND\"" $BBH_JSON_MERGED
     >&2 printf '\e[0m'
   fi
   AT_PROMPT=1 # Not safe (many shells can change this)
