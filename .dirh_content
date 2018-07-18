@@ -6,13 +6,15 @@ export DH_TAGS="${HOME}/.dh_tags"
 function dirHistoryFunction() {
    if [ -z "$1" ]
    then
-      dh_list $DH $DH_TAGS
+      dh_list $DH $DH_TAGS | tail -20
    else
       dh_list $DH $DH_TAGS | grep $*
    fi
 }
 
 alias dh=dirHistoryFunction
+alias dhall="dh_list $DH $DH_TAGS"
+
 alias sdh='dh | grep $@'
 alias cdl='cd `tail -2 $DH | head -1`'
 
