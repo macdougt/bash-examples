@@ -69,7 +69,7 @@ function PostCommand() {
     CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
 
     # Add entry to BBH
-    echo "{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":\"$epoch\",\"epoch\":\"$epoch\",\"id\":\"$CURRENT_PROCESSING_ID\",\"tty\":\"$tty\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON_MERGED
+    echo "{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":$CURRENT_PROCESSING_ID,\"epoch\":$epoch,\"tty\":\"$tty\",\"return_code\":${RET_CODE}}" >> $BBH_JSON_MERGED
 
     # Remove the tty key and replace the last processed, what happens in the first run
     unset COMMAND_MAP[$tty]
