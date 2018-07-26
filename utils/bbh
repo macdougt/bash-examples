@@ -59,11 +59,12 @@ my $buffer;
 
 # Iterate over file contents from bottom up and create hash with epoch key -> row data
 while (<BW>) {
+  $count++;
   next if $_ !~ /.+/;
   chomp;
   # Buffer the JSON structure
-  $buffer = $_.$buffer;
-  if ($buffer !~ /^\s*\{/) {
+  $buffer = "$_$buffer";
+  if ($buffer !~ /^\s*\{\"command/) {
     next;
   }
 
@@ -75,7 +76,8 @@ while (<BW>) {
 
   if ($@) {
     print "Error captured : $@\n";
-    print "Illegal json: $_\n";
+    print "Illegal json ($count): $_\n";
+    $error_count++;
     next;
   }
   
@@ -117,26 +119,6 @@ while (<BW>) {
   }
 }
 
-#   } elsif ($$cur_line{"type"} eq "post") {
-#     my $foreign_epoch;
-#     # Get the id
-#     if ($$cur_line{"id"} =~ /id_(.*)/) {
-#       $foreign_epoch = $1;
-#     }
-#     $db{$foreign_epoch}{"return_code"} = $$cur_line{"return_code"};
-#     #print "Added post $foreign_epoch\n";
-#   } elsif ($$cur_line{"type"} eq "full") {
-#      my $foreign_epoch;
-#     # Get the id
-#     if ($$cur_line{"id"} =~ /id_(.*)/) {
-#       $foreign_epoch = $1;
-#     }
-#     $db{$foreign_epoch}{"command_before"} = $$cur_line{"command"};
-#     #print "Added full $foreign_epoch\n";
-#   } else {
-#     print "WTF\n";
-#   }
-# }
 close BW;
 
 # Display results
