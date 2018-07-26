@@ -69,7 +69,12 @@ function PostCommand() {
     CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
 
     # Add entry to BBH
-    echo "{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":$CURRENT_PROCESSING_ID,\"epoch\":$epoch,\"tty\":\"$tty\",\"return_code\":${RET_CODE}}" >> $BBH_JSON_MERGED
+    CUR_JSON="{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":$CURRENT_PROCESSING_ID,\"epoch\":$epoch,\"tty\":\"$tty\",\"return_code\":${RET_CODE}}"
+
+    echo $CUR_JSON >> $BBH_JSON_MERGED
+
+    # Add entry into ELK
+    curl -s -X POST "localhost:9200/commands/command" -H 'Content-Type: application/json' -d"$CUR_JSON" > /dev/null
 
     # Remove the tty key and replace the last processed, what happens in the first run
     unset COMMAND_MAP[$tty]
