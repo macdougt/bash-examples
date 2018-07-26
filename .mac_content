@@ -11,3 +11,9 @@ alias vag='echo -e "\033]50;SetProfile=Vagrant\a"'
 # diff merge tool
 alias diffmerge='/Applications/DiffMerge.app/Contents/Resources/diffmerge.sh'
 
+# mdfind aliases
+function mdexact_function() {
+  mdfind perl.json | perl -lne "if (/$1/){print}"
+}
+alias mdexact=mdexact_function
+
