@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+file=$1
+
+greadlink -f $file
+echo
+echo $(file $file)
+echo
+echo "       lines words bytes"
+wc $file
+echo
+ls -alh $file
+
