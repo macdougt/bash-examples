@@ -67,6 +67,11 @@ function PostCommand() {
     ESC_FULL_COMMAND=${ESC_FULL_COMMAND//\"/\\\"}
 
     CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
+    # Is the processing id (epoch) set
+    if [ -z "$CURRENT_PROCESSING_ID" ]; then
+      CURRENT_PROCESSING_ID=$epoch
+    fi
+
 
     # Add entry to BBH
     CUR_JSON="{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":$CURRENT_PROCESSING_ID,\"epoch\":$epoch,\"tty\":\"$tty\",\"return_code\":${RET_CODE}}"
