@@ -17,3 +17,30 @@ function mdexact_function() {
 }
 alias mdexact=mdexact_function
 
+function setTabRgb {
+  echo -e "\033]6;1;bg;red;brightness;$1\a"
+  echo -e "\033]6;1;bg;green;brightness;$2\a"
+  echo -e "\033]6;1;bg;blue;brightness;$3\a"
+}
+
+function tab {
+  case $1 in
+    red)
+      setTabRgb 270 60 83
+    ;;
+    green)
+      setTabRgb 57 197 77
+    ;;
+    orange)
+      setTabRgb 227 143 10
+    ;;
+    grey)
+      setTabRgb 128 128 128
+    ;;
+    blue)
+      setTabRgb 51 153 255
+    ;;
+  esac
+}
+
+
