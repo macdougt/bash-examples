@@ -111,7 +111,6 @@ function range_function() {
 alias write_function='type -a'
 alias py='python3'
 
-alias ports="lsof -iTCP -sTCP:LISTEN -n -P"
 
 alias template=template_function
 function template_function() {

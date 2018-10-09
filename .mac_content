@@ -43,4 +43,4 @@ function tab {
   esac
 }
 
-
+alias ports='lsof -Pi4TCP -sTCP:LISTEN'
