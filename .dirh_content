@@ -18,6 +18,12 @@ alias dhall="dh_list $DH $DH_TAGS"
 alias sdh='dh | grep $@'
 alias cdl='cd `tail -2 $DH | head -1`'
 
+# Sort the directories according to visits
+function dhs() { 
+  perl -e 'while(<>){if(/"pwd":"([^"]+)"/){$seen{$1}++}}foreach my $key (sort { $seen{$a} <=> $seen{$b} } keys %seen) {print "$key $seen{$key}\n";}' ~/bbh_merged.json
+}
+
+
 # Override cd - change directory
 function cd() { 
    if [ -f "$*" ]
