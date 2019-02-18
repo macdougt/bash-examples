@@ -20,6 +20,7 @@ function dockerKillFunction() {
 }
 
 alias dockerkill=dockerKillFunction
+alias dockerkillall='echo "Killing all containers";docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
 
 # List docker images matching regexp
 function diFunction() {
@@ -31,7 +32,7 @@ alias dis='docker image ls --format "{{.Size}}\t{{.Repository}}" | gsort -h'
 alias di=diFunction
 
 function dirmFunction() {
-  di $1
+  di "$1"
   # Prompt user for input
   echo -n "Kill the above images [y/N]? "
   read answer
@@ -39,7 +40,7 @@ function dirmFunction() {
 
   if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
     echo "Performing kills now..."
-    docker image ls | egrep "$1" | awk '{print $3}' | xargs docker rmi
+    di "$1" | awk '{print $3}' | xargs docker rmi
   else
     echo "Just looking then"
   fi
@@ -47,10 +48,30 @@ function dirmFunction() {
 
 alias dirm=dirmFunction
 
-# Aliases
+function dcFunction() {
+  docker container ls -a | egrep "$1"
+}
 
-alias dockerkillall='echo "Killing all containers";docker stop $(docker container ls -a -q);docker rm $(docker container ls -a -q)'
+alias dcon=dcFunction
 
+function dcrmFunction() {
+  dcon "$1"
+  # Prompt user for input
+  echo -n "Kill the above containers [y/N]? "
+  read answer
+  echo
+
+  if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+    echo "Performing kills now..."
+    dcon "$1" | awk '{print $1}' | xargs docker rm -f
+  else
+    echo "Just looking then"
+  fi
+}
+
+alias dconrm=dcrmFunction
+
+# Set reverse sorting if gtac is available
 if command -v gtac > /dev/null 2>&1; then
   alias containers="docker container ls -a --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.Names}}' | gtac"
   alias images='docker image ls | gtac'
@@ -61,6 +82,7 @@ else
   alias dls='docker image ls;docker container ls -a'
 fi
 
+# Aliases
 alias dockerls=dls
 alias dockerlsc='docker container ls -a'
 alias dockerkillcreate='echo "Killing created containers";docker container ls -aq -f status=created | xargs docker rm'
@@ -69,3 +91,4 @@ alias dockerbash=docb
 alias docbroot='docb --user root'
 alias dockerstart=docs
 alias dtc='dockerkillall;dockerclean'
+
