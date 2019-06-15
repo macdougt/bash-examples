@@ -44,5 +44,7 @@ foreach my $file (@files)
 }
 
 my $new_val = $max_rev + 1;
-copy("$dir/$file_to_copy","$dir/$first_letter$new_val\_$file_to_copy") or die "Copy failed: $!";
+my $new_file_name = "$first_letter$new_val\_$file_to_copy";
+copy("$dir/$file_to_copy","$dir/$new_file_name") or die "Copy failed: $!";
+print "$dir/$new_file_name";
 
