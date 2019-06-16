@@ -60,3 +60,6 @@ function dialog() {
     /usr/bin/osascript -e "tell app \"iTerm\" to display dialog \"$2\" with title \"$1\"" 
   fi
 }
+
+# Source iTerm shell integration if present
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
