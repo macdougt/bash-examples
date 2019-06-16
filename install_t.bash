@@ -57,7 +57,7 @@ while [[ "$1" != "" ]]; do
   case "$1" in
     -h | --help)    usage; exit;; # Display usage
     -u | --user)
-      INSTALL_USER=$VALUE
+      INSTALL_USER=$2
       # check if the user exists
       ERROR_MESSAGE=$(id -u $INSTALL_USER 2>&1)
       if [ $? != 0 ]
@@ -80,7 +80,11 @@ done
 # Set the install user
 # TODO shouldn t this fail if the user does not exist
 if [ -z "$INSTALL_USER" ]; then
-  INSTALL_USER=$(logname) # sudoing user
+  if [ "$(uname)" == "Darwin" ]; then
+    INSTALL_USER=$(logname) # sudoing user
+  else
+    INSTALL_USER=$(whoami)
+  fi
 fi
 
 if [ $DRY_RUN -eq 1 ]; then
