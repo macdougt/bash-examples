@@ -46,11 +46,17 @@ function tab {
 alias ports='lsof -Pi4TCP -sTCP:LISTEN'
 
 function notify() {
-  if [ "$#" -ne 2]; then
+  if [ "$#" -ne 2 ]; then
     /usr/bin/osascript -e "display notification \"$*\""
   else
     /usr/bin/osascript -e "display notification \"$2\" with title \"$1\""
   fi
 }
 
-
+function dialog() {
+  if [ "$#" -ne 2 ]; then
+    /usr/bin/osascript -e "tell app \"iTerm\" to display dialog \"$*\""
+  else
+    /usr/bin/osascript -e "tell app \"iTerm\" to display dialog \"$2\" with title \"$1\"" 
+  fi
+}
