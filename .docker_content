@@ -73,10 +73,12 @@ alias dconrm=dcrmFunction
 
 # Set reverse sorting if gtac is available
 if command -v gtac > /dev/null 2>&1; then
+  alias con="docker container ls -a --format 'table {{.Names}}\t[{{.Image}}]\t{{.Status}}' | gtac"
   alias containers="docker container ls -a --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.Names}}' | gtac"
   alias images='docker image ls | gtac'
   alias dls='docker image ls | gtac;docker container ls -a | gtac'
 else
+  alias con="docker container ls -a --format 'table {{.Names}}\t[{{.Image}}]\t{{.Status}}'"
   alias containers="docker container ls -a --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}\t{{.Names}}'" 
   alias images='docker image ls'
   alias dls='docker image ls;docker container ls -a'
