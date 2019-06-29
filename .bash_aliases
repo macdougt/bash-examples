@@ -144,5 +144,16 @@ function template_function() {
   fi
 }
 
+alias dtype=dtype_function
+function dtype_function() {
+while read l1 ;do 
+  regex="aliased to \`(.*)'"
 
+  echo $l1
 
+  if [[ $l1 =~ $regex ]];then     
+    name="${BASH_REMATCH[1]}"
+    type $name
+  fi
+done < <(type $*)
+}
