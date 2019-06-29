@@ -187,7 +187,7 @@ BBH_CONTENT='.bbh_content'
 
 UTILITIES=('appendif' 'cdn' 'getDir' 'cleandh' 'cleaneh' 'cd_to_file' 'list' 'dh_list' 'pipelist' 'bu' 'history_unique' 'bbh' 'ips' 'vloc' 'tvi' 'bbq' 'hh' 'bbh2' 'update_file_from_url')
 MAC_UTILITIES=('new')
-DOCKER_UTILITIES=('docb' 'docs')
+DOCKER_UTILITIES=('docb' 'docs' 'dk')
 DOCKER_MACHINE_UTILITIES=('dm_connect')
 PERL_UTILITIES=('picklist')
 
