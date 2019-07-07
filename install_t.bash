@@ -13,7 +13,7 @@ function usage()
   echo ""
   echo $0 
   echo -e "\t-h --help"
-  echo -e "\t-u=[username] or --user=[username]"
+  echo -e "\t-u [username] or --user=[username]"
   echo ""
 }
 
