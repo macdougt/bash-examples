@@ -94,3 +94,8 @@ alias docbroot='docb --user root'
 alias dockerstart=docs
 alias dtc='dockerkillall;dockerclean'
 
+function dnetworkcontainersFunction() {
+  docker network inspect -f '{{ range $key, $value := .Containers }}{{ printf "%s\n" $key }}{{ end }}' $1 | xargs docker inspect --format="{{.Name}}" | sed 's/^.//'
+}
+
+alias dockernetworkcontainers=dnetworkcontainersFunction
