@@ -14,6 +14,7 @@ function usage()
   echo $0 
   echo -e "\t-h --help"
   echo -e "\t-u [username] or --user=[username]"
+  echo -e "\t-n | --dry-run"
   echo ""
 }
 
