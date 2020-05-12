@@ -23,6 +23,7 @@ GetOptions(
   \%options,
   'all',
   'cwd',
+  'dir=s',
   'help',
   'lines=i',
   'man',
@@ -110,6 +111,12 @@ while (<BW>) {
   } elsif (exists($options{'cwd'})) {
     my $cwd_val = getcwd;
     if ($$cur_line{"pwd_before"} eq $cwd_val) { 
+      $db{$epoch} = $cur_line;
+      $visible_line_count++;
+    }
+  } elsif (exists($options{'dir'})) {
+    my $dir_val = $options{'dir'};
+    if ($$cur_line{"pwd_before"} eq $dir_val) { 
       $db{$epoch} = $cur_line;
       $visible_line_count++;
     }
@@ -291,7 +298,8 @@ sub zero_fill {
 
  -a, --all       not implemented
  -c, --cwd       print captured commands from the current directory
- -h, --help   print Options and Arguments
+ -d, --dir       print captured commands from the specified directory
+ -h, --help      print Options and Arguments
  -m, --man       print complete man page
  -l, --lines     print number of lines matching options
  -p, --pattern   print commands matching pattern (e.g. ^psql)
