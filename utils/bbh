@@ -4,6 +4,7 @@
 # TODO fix format on non summary
 #      get the return codes correct
 #      pattern
+#      return results with surrounding items configurable number of lines
 
 use Getopt::Long;
 use Pod::Usage;
@@ -50,6 +51,7 @@ my %db;
 my $visible_line_count;
 my $count;
 my $error_count;
+my $early_results;
 
 my $bbh_file = $ENV{"HOME"}."/bbh_merged.json";
 tie *BW, 'File::ReadBackwards', $bbh_file or
@@ -87,6 +89,14 @@ while (<BW>) {
   # Check count if necessary
   if ($visible_line_count >= $options{'lines'}) {
     last;
+  } elsif (! $early_results && $count > 1000 && $visible_line_count >= 5) {
+    # Print out the early result if not summary
+    if (! exists($options{'summary'})) {
+      &print_results();
+      print("-"x100);
+      print("\n");
+      $early_results = 1;
+    }
   }
 
   my $epoch = $$cur_line{"epoch"};
@@ -196,7 +206,12 @@ if (exists($options{'summary'})) {
   # Print the last one
   print_command_env(\%db, $stack_start_key, $last_key, $stack_count);
 } else {
+  # Show all (i.e. no summary)
+  &print_results();
+  print "Traversed ".($count-1)." records\n";
+}
 
+sub print_results {
   # Show all (i.e. no summary)
   foreach my $key (sort { $a <=> $b } keys %db) {
    # Do not show command and full command if equal
@@ -217,7 +232,6 @@ if (exists($options{'summary'})) {
     }
   }
 }
-
 
 sub array_equals {
   my $ra1 = shift;
