@@ -32,7 +32,7 @@ alias vi='tvi'
 alias vil='vi `fc -s`'
 alias vcs='vi ${HOME}/.bashrc'
 alias updatedb='sudo updatedb'
-alias webhere='python -m SimpleHTTPServer '
+alias webhere='python -m http.server'
 alias utils='wget https://raw.githubusercontent.com/macdougt/bash-examples/master/install_t.bash -O install_t.bash'
 
 # For locate
