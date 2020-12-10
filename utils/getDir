@@ -156,10 +156,15 @@ sub prompt_user {
     }
   }
 
-  # Is there only one result
+  # Is there only one result, return it
   if ( $list_length == 0 ) {
     print STDERR "Matched one: $$ra_list[0]\n";
     return $$ra_list[0];
+  } elsif ($list_length < 0) {
+    # List is empty, suggest using mdfind
+    print STDERR "Maybe use:\n\tmdfind -name $cdInput | grep $cdInput\$\n\tmdfind -name $cdInput\n";
+    print STDERR "Or:\n\tlocate $cdInput | grep $cdInput\$\n\tlocate $cdInput";
+    exit()  
   }
 
   # More than one result
