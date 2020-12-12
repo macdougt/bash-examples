@@ -1,8 +1,9 @@
 # Bash aliases
-
+# requirements
+# exa, python3, updatedb, wget
 
 # Builtin bash
-alias a='alias'
+alias a='dtype'
 alias c='clear'
 alias g='grep'
 alias eg='egrep'
@@ -14,10 +15,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
   alias ls='ls --color=never --show-control-chars'
 fi
 
-
-alias l='ls -CF'
+alias l='exa'
 alias la='ls -A'
-alias lal='ls -alhtr'
+alias lal='exa -lhr -s=modified'
 alias ll='ls -lhtr'
 alias path='env | grep ^PATH='
 alias pdb='python -m pdb'
@@ -32,7 +32,7 @@ alias vi='tvi'
 alias vil='vi `fc -s`'
 alias vcs='vi ${HOME}/.bashrc'
 alias updatedb='sudo updatedb'
-alias webhere='python -m http.server'
+alias webhere='python -m SimpleHTTPServer '
 alias utils='wget https://raw.githubusercontent.com/macdougt/bash-examples/master/install_t.bash -O install_t.bash'
 
 # For locate
@@ -74,7 +74,9 @@ function it2prof {
 }
 
 function hline_function() {
-  for ((i=1;i<=$1;i++))
+
+  local DASHES="${1:-80}"
+  for ((i=1;i<=${DASHES};i++))
   do
   printf '\e(0\x71\e(B%.0s'
   done
@@ -147,14 +149,19 @@ function template_function() {
 
 alias dtype=dtype_function
 function dtype_function() {
-while read l1 ;do 
-  regex="aliased to \`(.*)'"
+  if [ -z $1 ]
+  then
+    alias
+  else
+    while read l1 ;do 
+      regex="aliased to \`(.*)'"
 
-  echo $l1
+      echo $l1
 
-  if [[ $l1 =~ $regex ]];then     
-    name="${BASH_REMATCH[1]}"
-    type $name
+      if [[ $l1 =~ $regex ]];then     
+        name="${BASH_REMATCH[1]}"
+        type $name
+      fi
+    done < <(type $*)
   fi
-done < <(type $*)
 }
