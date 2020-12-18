@@ -17,7 +17,7 @@ fi
 
 alias l='exa'
 alias la='ls -A'
-alias lal='exa -lhr -s=modified'
+alias lal='exa -alhr -s=modified'
 alias ll='ls -lhtr'
 alias path='env | grep ^PATH='
 alias pdb='python -m pdb'
@@ -147,6 +147,10 @@ function template_function() {
   fi
 }
 
+function dot() {
+  egrep "$1" $DOT_FILES_STRING
+}
+
 alias dtype=dtype_function
 function dtype_function() {
   if [ -z $1 ]
@@ -163,5 +167,10 @@ function dtype_function() {
         type $name
       fi
     done < <(type $*)
+    echo ""
+    echo "Found in:"
+    echo "---------"
+
+    dot "alias $1\b|function $1\b"
   fi
 }

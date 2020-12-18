@@ -61,5 +61,9 @@ function dialog() {
   fi
 }
 
+function dupf() {
+  gfind -not -empty -type f -printf "%s\n" | sort -rn | guniq -d | xargs -I{} -n1 gfind -type f -size {}c -print0 | xargs -0 md5sum | sort | guniq -w32 --all-repeated=separate
+}
+
 # Source iTerm shell integration if present
 test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"

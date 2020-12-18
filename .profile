@@ -3,6 +3,8 @@ for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_co
 done
 unset file
 
+export DOT_FILES_STRING=$(for file in ${HOME}/.{bash_aliases,bbh_content,dirh_content,docker_content,dm_content,dc_content,hist_content,edit_content,optional_content}; do echo -n " $file"; done)
+
 # Add MAC specific content
 if [ "$(uname)" == "Darwin" ]; then
   source ${HOME}/.mac_content
