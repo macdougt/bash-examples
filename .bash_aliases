@@ -5,8 +5,8 @@
 # Builtin bash
 alias a='dtype'
 alias c='clear'
-alias g='grep'
 alias eg='egrep'
+alias g='grep'
 
 # Not for MAC
 if [ "$(uname)" == "Darwin" ]; then
@@ -147,6 +147,11 @@ function template_function() {
   fi
 }
 
+function ddu() {
+  local RESULTS="${1:-20}"
+  du -sh * | sort -h | tail -${RESULTS}
+}
+
 function dot() {
   egrep "$1" $DOT_FILES_STRING
 }
@@ -165,12 +170,15 @@ function dtype_function() {
       if [[ $l1 =~ $regex ]];then     
         name="${BASH_REMATCH[1]}"
         type $name
+        if [ $? -eq 0 ]; then
+          echo ""
+          echo "Found in:"
+          echo "---------"
+
+          dot "alias $1\b|function $1\b"
+        fi
       fi
     done < <(type $*)
-    echo ""
-    echo "Found in:"
-    echo "---------"
-
-    dot "alias $1\b|function $1\b"
+    # TODO could go deeper
   fi
 }
