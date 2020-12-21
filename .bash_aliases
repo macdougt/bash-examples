@@ -17,7 +17,7 @@ fi
 
 alias l='exa'
 alias la='ls -A'
-alias lal='exa -alhr -s=modified'
+alias lal='exa -alh -s=modified'
 alias ll='ls -lhtr'
 alias path='env | grep ^PATH='
 alias pdb='python -m pdb'
@@ -32,7 +32,7 @@ alias vi='tvi'
 alias vil='vi `fc -s`'
 alias vcs='vi ${HOME}/.bashrc'
 alias updatedb='sudo updatedb'
-alias webhere='python -m SimpleHTTPServer '
+alias webhere='python -m http.server '
 alias utils='wget https://raw.githubusercontent.com/macdougt/bash-examples/master/install_t.bash -O install_t.bash'
 
 # For locate
@@ -162,7 +162,10 @@ function dtype_function() {
   then
     alias
   else
-    while read l1 ;do 
+    # Processing output looking for aliases then run type on the 
+    # output. The structure of the while read loop allows input
+    # from the done line (ref: http://www.compciv.org/topics/bash/loops)
+    while read l1 ;do
       regex="aliased to \`(.*)'"
 
       echo $l1
@@ -170,15 +173,17 @@ function dtype_function() {
       if [[ $l1 =~ $regex ]];then     
         name="${BASH_REMATCH[1]}"
         type $name
-        if [ $? -eq 0 ]; then
-          echo ""
-          echo "Found in:"
-          echo "---------"
-
-          dot "alias $1\b|function $1\b"
-        fi
       fi
     done < <(type $*)
+
+    OUTPUT=$(dot "alias $1\b|function $1\b")
+
+    if [[ $OUTPUT ]]; then
+      echo ""
+      echo "Found in:"
+      echo "---------"
+      echo $OUTPUT
+    fi
     # TODO could go deeper
   fi
 }
