@@ -147,6 +147,46 @@ function template_function() {
   fi
 }
 
+function _exchange() {
+  basename1="$(basename -- $1)"
+  basename2="$(basename -- $2)"
+  echo "$basename1"
+  echo "$basename2"
+  echo "mv $1 $2 /tmp/t1"
+  mv $1 $2 /tmp/t1
+
+  # The above copy needs to have completed successfully
+  if [[ $? -eq 0 ]]
+  then
+    echo "cp /tmp/t1/$basename1 $2"
+    cp -r /tmp/t1/$basename1 $2
+    echo "cp /tmp/t1/$basename2 $1"
+    cp -r /tmp/t1/$basename2 $1
+  fi
+  return $?
+}
+
+
+function exchange() {
+  if [ $# -ne 2 ]; then
+    echo 1>&2 "Usage: $0 <file/dir> <file/dir>"
+    exit 1
+  fi
+  
+  # Validate that they are both the same type
+  # and exist
+  if [[ -d $1 && -d $2 ]]; then
+    echo "Exchanging directories"
+    _exchange $1 $2
+  elif [[ -f $1 && -f $2 ]]; then
+    echo "Exchanging files"
+    _exchange $1 $2
+  else
+    echo "Either the types do not match or at least one of your arguments does not exist"
+    exit 2
+  fi
+}
+
 function ddu() {
   local RESULTS="${1:-20}"
   du -sh * | sort -h | tail -${RESULTS}
@@ -154,6 +194,10 @@ function ddu() {
 
 function dot() {
   egrep "$1" $DOT_FILES_STRING
+}
+
+function dot_link() {
+  echo -e $(egrep "$1" $DOT_FILES_STRING | sed -E 's/(.*)\/(.+):.*/\\e]8;;vscode:\/\/file\/\1\/\2\\e\\\\\2\\e]8;;\\e\\\\\\n/')
 }
 
 alias dtype=dtype_function
@@ -176,7 +220,7 @@ function dtype_function() {
       fi
     done < <(type $*)
 
-    OUTPUT=$(dot "alias $1\b|function $1\b")
+    OUTPUT=$(dot_link "alias $1\b|function $1\b")
 
     if [[ $OUTPUT ]]; then
       echo ""
