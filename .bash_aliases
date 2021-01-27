@@ -117,7 +117,11 @@ alias py='python3'
 
 alias template=template_function
 function template_function() {
-  if [ -f "/templates/$1" ]
+  TEMPLATE_DIR="${HOME}/data/templates"
+
+  RESULT=$(find $TEMPLATE_DIR -path ./.history -prune -false -o -type f -name "$1")
+
+  if [ -f "$RESULT" ]
   then
     echo "Template $1"
     if [ -z "$2" ]
@@ -129,17 +133,17 @@ function template_function() {
         echo "yo.pl exists, not overwriting"
         return 1
       else
-        cp /templates/$1 ./yo.pl
+        cp $RESULT ./yo.pl
       fi
     else
-      echo "Creating $2 from template $1"
       # Check for file existence of 2nd argument 
-      if [ -e "./$1" ]
+      if [ -e "$2" ]
       then
         echo "$2 exists, not overwriting"
         return 2
       else
-        cp /templates/$1 ./$2
+        echo "Creating $2 from template $1"
+        cp $RESULT ./$2
       fi
     fi
   else
