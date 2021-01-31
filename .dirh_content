@@ -3,6 +3,9 @@
 export DH="${HOME}/.dirhistory"
 export DH_TAGS="${HOME}/.dh_tags"
 
+# TODO test for this?
+BBH_JSON_MERGED="${HOME}/bbh_merged.json"
+
 function dirHistoryFunction() {
    if [ -z "$1" ]
    then
@@ -23,6 +26,9 @@ function dhs() {
   perl -e 'while(<>){if(/"pwd":"([^"]+)"/){$seen{$1}++}}foreach my $key (sort { $seen{$a} <=> $seen{$b} } keys %seen) {print "$key $seen{$key}\n";}' ~/bbh_merged.json
 }
 
+function ddh() {
+  perl -e 'while(<>){if($_=~/"pwd":"([^"]+)"/){if(! $lastVal || $lastVal ne $1){print "$1\n";$lastVal=$1}}}' $BBH_JSON_MERGED
+}
 
 # Override cd - change directory
 function cd() { 
