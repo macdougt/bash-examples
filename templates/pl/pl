@@ -1,0 +1,14 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $file = shift;
+
+open (my $fh, "< $file") || die "Sorry, I couldn't read $file.\n";
+
+while (<$fh>) {
+  
+}
+
+close $fh;
