@@ -3,28 +3,28 @@
 # TODO maybe add cwd or last unique path ending, maybe machine too if many machines will
 # contribute
 
-BIG_HISTORY="${HOME}/.bash_big_history"
-export BBH=$BIG_HISTORY
+export BBH_JSON_MERGED="${HOME}/bbh_merged.json"
+export BBH=$BBH_JSON_MERGED
 
-export BBH_JSON="${HOME}/bbh.json"
+# Global map of tty to unique _id (id_+=timestamp at key creation)
+declare -A COMMAND_MAP
 
 # This will run before any command is executed.
 function PreCommand() {
+
   if [ -z "$AT_PROMPT" ]; then
     return
   fi
   unset AT_PROMPT
-
+  FULL_COMMAND1=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
   CURRENT_COMMAND=$BASH_COMMAND
   export CURRENT_COMMAND
-  #echo "--$CURRENT_COMMAND--"
 
   # Do not process PostCommand
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     # pid, user, pwd, epoch, date readable, tty, hostname
-
-    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\"/\\\"}
-
+    export ESC_CURRENT_COMMAND=${CURRENT_COMMAND//\\/\\\\}
+    ESC_CURRENT_COMMAND=${ESC_CURRENT_COMMAND//\"/\\\"}
     cur_pid=$$
     user=$(whoami)
     dir=$(pwd)
@@ -32,10 +32,11 @@ function PreCommand() {
     date_nice=$(date)
     tty=$(tty)
     cur_host=$(hostname)
-    echo "[pre $cur_pid $user $dir $epoch \"$date_nice\" $tty $cur_host] $CURRENT_COMMAND" >> $BIG_HISTORY
-    echo "{\"type\":\"pre\",\"user\":\"$user\",\"pwd\":\"$dir\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
 
-    #printf "\n[%d %s %s %d %s %s] %s" $$ $(whoami) $(pwd) $(date +'%s') '$(date)' $(tty) $CURRENT_COMMAND >> $BIG_HISTORY
+    # Add entry to map, use tty and directory to keep uniqueness
+    current_id="$epoch"
+    COMMAND_MAP[$tty]=$current_id
+    COMMAND_MAP[$tty,pwd]=$dir
   fi
 }
 
@@ -46,7 +47,7 @@ trap "PreCommand" DEBUG
 # the first prompt).
 FIRST_PROMPT=1
 function PostCommand() {
-  RET_CODE=$?
+  local RET_CODE="$?"
   cur_pid=$$
   user=$(whoami)
   dir=$(pwd)
@@ -54,14 +55,36 @@ function PostCommand() {
   tty=$(tty)
   cur_host=$(hostname)
 
+  # Use powerline-shell if available
+  if [ -x "$(command -v powerline-shell)" ]; then
+    PS1="$(powerline-shell $RET_CODE)"
+  fi
+  
   #echo "-+$CURRENT_COMMAND+-"
   if [ "$CURRENT_COMMAND" != "PostCommand" ]; then
     FULL_COMMAND=$(fc -ln "$1" "$1" | sed '1s/^[[:space:]]*//')
-    ESC_FULL_COMMAND=${FULL_COMMAND//\"/\\\"}
-    echo "[post $CURRENT_COMMAND $cur_pid $dir $epoch $tty $cur_host ${RET_CODE}]" >> $BIG_HISTORY
-    echo "{\"type\":\"post\",\"command\":\"$ESC_CURRENT_COMMAND\",\"pid\":\"$cur_pid\",\"pwd\":\"$dir\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\",\"return_code\":\"${RET_CODE}\"}" >> $BBH_JSON
-    echo "[full $FULL_COMMAND $user $cur_pid $epoch $(tty)]" >> $BIG_HISTORY
-    echo "{\"type\":\"full\",\"command\":\"$ESC_FULL_COMMAND\",\"user\":\"$user\",\"pid\":\"$cur_pid\",\"epoch\":\"$epoch\",\"tty\":\"$tty\",\"host\":\"$cur_host\"}" >> $BBH_JSON
+    ESC_FULL_COMMAND=${FULL_COMMAND//\\/\\\\}
+    ESC_FULL_COMMAND=${ESC_FULL_COMMAND//\"/\\\"}
+
+    CURRENT_PROCESSING_ID=${COMMAND_MAP[$tty]}
+    # Is the processing id (epoch) set
+    if [ -z "$CURRENT_PROCESSING_ID" ]; then
+      CURRENT_PROCESSING_ID=$epoch
+    fi
+
+
+    # Add entry to BBH
+    CUR_JSON="{\"command_before\":\"$ESC_CURRENT_COMMAND\",\"command\":\"$ESC_FULL_COMMAND\",\"host\":\"$cur_host\",\"user\":\"$user\",\"pwd_before\":\"${COMMAND_MAP[$tty,pwd]}\",\"pwd\":\"$dir\",\"epoch_before\":$CURRENT_PROCESSING_ID,\"epoch\":$epoch,\"tty\":\"$tty\",\"return_code\":${RET_CODE}}"
+
+    echo $CUR_JSON >> $BBH_JSON_MERGED
+
+    # Add entry into ELK
+    curl -s -X POST "localhost:9200/commands/command" -H 'Content-Type: application/json' -d"$CUR_JSON" > /dev/null
+
+    # Remove the tty key and replace the last processed, what happens in the first run
+    unset COMMAND_MAP[$tty]
+    unset COMMAND_MAP[$tty,pwd]
+
     if [ -n "$FIRST_PROMPT" ]; then
       unset FIRST_PROMPT
       return
@@ -70,57 +93,13 @@ function PostCommand() {
     # Consider next command
     >&2 printf '\e[38;2;90;90;90m'
     >&2 echo -n "Seen $CURRENT_COMMAND: "
-    >&2 grep -c "pre.*$CURRENT_COMMAND" $BIG_HISTORY
+    >&2 grep -c "\"command\":\"$CURRENT_COMMAND\"" $BBH_JSON_MERGED
     >&2 printf '\e[0m'
   fi
-  AT_PROMPT=1
+  AT_PROMPT=1 # Not safe (many shells can change this)
+  return $RET_CODE
 }
 
 PROMPT_COMMAND="PostCommand"
 
-# Tracking - bbh
-function bbh_function() {
-  ALL=false
-  while [[ "$#" -gt "0" ]]
-  do
-    key="$1"
-
-    case $key in
-      -a|--all)
-      #UNIQUE_CLAUSE='| perl -lne '"'"'if(/\[full(.*) \d+ \d+ [\w\/]+\]/){print $1}'"'"''
-      echo "Showing all..."
-      ALL=true
-      shift # past argument
-      ;;
-      *)
-      break
-      ;;
-    esac
-  done
-
-  
-
-  if [ "$#" -eq "0" ] ; then
-    if [ "$ALL" = "true" ]; then 
-      list $BIG_HISTORY | perl -lne 'if(/\[full(.*) [\w-_]+ \d+ \d+ [\w\/]+\]/){print $1}';
-    else
-      list $BIG_HISTORY | bbh_unique;
-    fi
-  else
-    if [ "$ALL" = "true" ]; then
-      list $BIG_HISTORY | egrep $* | perl -lne 'if(/\[full(.*) [\w-_]+ \d+ \d+ [\w\/]+\]/){print $1}';
-    else
-      list $BIG_HISTORY | egrep $* | bbh_unique;
-    fi     
-  fi
-}
-alias bbh=bbh_function
-
-function bbr_function() {
-   command_to_run=$(bbh_function | grep ^"$1 " | cut -d' ' -f2-)
-   echo "$command_to_run"
-   $command_to_run
-}
-alias bbr=bbr_function
-alias big='vi $BIG_HISTORY'
-alias bbh_here='perl -e '"'"'$d=`pwd`;chomp($d);while(<>){if (/$d\s/){print $_}}'"'"' $BBH'
+alias big='vi $BBH_JSON_MERGED'
